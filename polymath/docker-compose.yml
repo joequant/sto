@@ -1,0 +1,16 @@
+version:  '3'
+services:
+  polymath:
+     image: "joequant/polymath"
+     stdin_open: true
+     tty: true
+     volumes:
+       - home:/home
+     depends_on:
+       - ganache
+  ganache:
+     image: trufflesuite/ganache-cli
+     ports:
+       - "8545:8545"
+volumes:
+   home:
