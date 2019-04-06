@@ -10,6 +10,7 @@ services:
        - ganache
   ganache:
      image: trufflesuite/ganache-cli
+     command: /usr/bin/ganache-cli -l 1000000000
      ports:
        - "8545:8545"
 volumes:
