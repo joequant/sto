@@ -1,0 +1,10 @@
+version:  '3'
+services:
+  basedev:
+     image: "joequant/basedev"
+     stdin_open: true
+     tty: true
+     volumes:
+       - home:/home
+volumes:
+   home:

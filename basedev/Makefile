@@ -1,2 +1,2 @@
 target:
-	docker build -t joequant/basedev .
+	docker build -t joequant/basedev . --no-cache
