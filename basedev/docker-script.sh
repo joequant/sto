@@ -6,3 +6,7 @@ su user -c '/bin/bash /tmp/docker-script-user.sh'
 cat <<EOF > /etc/sudoers.d/90user
 user ALL=(ALL) NOPASSWD:ALL
 EOF
+
+cat <<EOF >> /etc/dnf/dnf.conf
+excludepkgs=filesystem
+EOF
