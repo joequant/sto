@@ -7,8 +7,8 @@ services:
      volumes:
        - home:/home
      depends_on:
-       - ganache
-  ganache:
+       - ganache-cli
+  ganache-cli:
      image: trufflesuite/ganache-cli
      command: /usr/bin/ganache-cli -l 1000000000
      ports:
