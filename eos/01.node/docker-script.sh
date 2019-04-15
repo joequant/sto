@@ -26,3 +26,4 @@ rpm -Uvh --nodeps http://download-ib01.fedoraproject.org/pub/fedora/linux/releas
 su user -p -c '/bin/bash /tmp/docker-script-user.sh'
 
 npm config delete registry
+cd /home/user/git/sto/eos && echo "master:$(git rev-parse HEAD)" > /etc/eosio-version
