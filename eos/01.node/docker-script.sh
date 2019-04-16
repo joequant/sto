@@ -16,10 +16,14 @@ if [[ ! -z "$http_proxy" ]] ; then
     yarn config set strict-ssl false
 fi
 
-dnf install -y --allowerasing --best --setopt=install_weak_deps=False --nodocs libedit-devel ncurses-devel git sudo procps-ng which gcc gcc-c++ autoconf automake libtool make \
-	bzip2-devel wget bzip2 compat-openssl10 graphviz doxygen \
-	openssl-devel gmp-devel libstdc++-devel python2 python2-devel python3 python3-devel \
-	libedit ncurses-devel swig libcurl-devel libusb-devel
+dnf install -y --allowerasing --best --refresh \
+        --setopt=install_weak_deps=False \
+	--nodocs libedit-devel ncurses-devel git sudo procps-ng which \
+	gcc gcc-c++ autoconf automake libtool make bzip2-devel wget \
+	bzip2 compat-openssl10 graphviz doxygen openssl-devel \
+	gmp-devel libstdc++-devel python2 python2-devel python3 \
+	python3-devel libedit ncurses-devel swig libcurl-devel \
+	libusb-devel
 
 dnf upgrade -y --setopt=install_weak_deps=False --nodocs --allowerasing --best
 rpm -Uvh \
