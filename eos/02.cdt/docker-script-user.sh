@@ -4,6 +4,7 @@ set -v
 
 export HOME=/home/`whoami`
 export PATH=$PATH:$HOME/bin
+export MAKEFLAGS=-j4
 
 if [[ ! -z "$http_proxy" ]] ; then
     git config --global http.proxy $http_proxy
