@@ -4,6 +4,9 @@ services:
      image: "joequant/basedev"
      stdin_open: true
      tty: true
+     user: user
+     command: /bin/bash
+     working_dir: /home/user
      volumes:
        - home:/home
 volumes:

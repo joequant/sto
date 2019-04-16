@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
-#export http_proxy=http://172.17.0.1:3128/
-#export https_proxy=http://172.17.0.1:3128/
-#export ftp_proxy=http://172.17.0.1:3128/
-#export HTTP_PROXY=http://172.17.0.1:3128/
-#export PIP_INDEX_URL=http://localhost:3141/root/pypi/+simple/
-#export GIT_PROXY=http://localhost:8080/
+export http_proxy=http://172.17.0.1:3128/
+export https_proxy=http://172.17.0.1:3128/
+export ftp_proxy=http://172.17.0.1:3128/
+export HTTP_PROXY=http://172.17.0.1:3128/
+export PIP_INDEX_URL=http://localhost:3141/root/pypi/+simple/
+export GIT_PROXY=http://localhost:8080/
 
 useradd user
 dnf install -y --allowerasing --best --setopt=install_weak_deps=False --nodocs git npm make gcc-c++ curl llvm sudo --refresh
