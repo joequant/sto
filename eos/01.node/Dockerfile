@@ -10,7 +10,7 @@ COPY --from=builder /tmp/config.ini /
 COPY --from=builder /tmp/nodeosd.sh /opt/eosio/bin
 COPY --from=builder /etc/eosio-version /etc
 ENV EOSIO_ROOT=/opt/eosio
-RUN chmod +x /opt/eosio/bin/nodeosd.sh
+RUN chmod +x /opt/eosio/bin/nodeosd.sh ; mkdir -p /opt/eosio/bin/data-dir/contracts
 ENV LD_LIBRARY_PATH /usr/lib
 ENV PATH /opt/eosio/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
