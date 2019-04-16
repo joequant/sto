@@ -1,7 +1,7 @@
 FROM joequant/basedev as builder
 USER root
 COPY docker-script.sh docker-script-user.sh config.ini nodeosd.sh /tmp/
-RUN source /tmp/docker-script.sh ; rm /tmp/*.sh
+RUN source /tmp/docker-script.sh
 COPY docker-script-user.sh /home/user
 
 FROM joequant/cauldron
