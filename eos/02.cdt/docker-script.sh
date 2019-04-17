@@ -18,7 +18,7 @@ fi
 
 npm install -g truffle
 
-dnf install -y --allowerasing --best --setopt=install_weak_deps=False --nodocs cmake
+dnf install -y --allowerasing --best --setopt=install_weak_deps=False --nodocs cmake llvm
 
 su user -p -c '/bin/bash /tmp/docker-script-user.sh'
 npm config delete registry
