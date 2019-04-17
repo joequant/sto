@@ -1,0 +1,21 @@
+version:  '3'
+services:
+  polymath:
+     image: "joequant/polymath3"
+     stdin_open: true
+     tty: true
+     user: user
+     command: "/bin/bash"
+     working_dir: /home/user
+     volumes:
+       - user-volume-dev:/home/user
+     depends_on:
+       - ganache-cli
+  ganache-cli:
+     image: trufflesuite/ganache-cli
+     command: /usr/bin/ganache-cli -l 1000000000
+     ports:
+       - "8545:8545"
+volumes:
+   user-volume-dev:
+     external: true
