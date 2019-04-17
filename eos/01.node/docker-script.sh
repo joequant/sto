@@ -16,6 +16,8 @@ if [[ ! -z "$http_proxy" ]] ; then
     yarn config set strict-ssl false
 fi
 
+npm install -g truffle
+
 dnf install -y --allowerasing --best --refresh \
         --setopt=install_weak_deps=False \
 	--nodocs libedit-devel ncurses-devel git sudo procps-ng which \

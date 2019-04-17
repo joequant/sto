@@ -16,6 +16,8 @@ if [[ ! -z "$http_proxy" ]] ; then
     yarn config set strict-ssl false
 fi
 
+npm install -g truffle
+
 dnf install -y --allowerasing --best --setopt=install_weak_deps=False --nodocs cmake
 
 su user -p -c '/bin/bash /tmp/docker-script-user.sh'
