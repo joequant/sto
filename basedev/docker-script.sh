@@ -14,8 +14,10 @@ cat <<EOF > /etc/sudoers.d/90user
 user ALL=(ALL) NOPASSWD:ALL
 EOF
 
+# filesystem
+# replacing chkconfig will fail on dockerhub
 cat <<EOF >> /etc/dnf/dnf.conf
-excludepkgs=filesystem
+excludepkgs=filesystem,chkconfig
 EOF
 npm cache clean --force
 pushd /usr/lib/node_modules
