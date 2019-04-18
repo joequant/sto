@@ -10,15 +10,12 @@ set -v
 
 if [[ ! -z "$http_proxy" ]] ; then
     npm config set registry http://registry.npmjs.org/
-    npm install -g yarn
     npm set strict-ssl false
     yarn config set registry http://registry.yarnpkg.com/
     yarn config set strict-ssl false
 fi
-
-npm install -g truffle
-
-dnf install -y --allowerasing --best --setopt=install_weak_deps=False --nodocs cmake llvm
-
+export USER=root
+npm install -g truffle@v4
 su user -p -c '/bin/bash /tmp/docker-script-user.sh'
 npm config delete registry
+
