@@ -15,8 +15,9 @@ if [[ ! -z "$http_proxy" ]] ; then
 fi
 
 pushd /home/user
-git clone https://github.com/joequant/eosio.cdt.git
+git clone https://github.com/EOSIO/eosio.cdt.git
 pushd eosio.cdt
+curl https://github.com/EOSIO/eosio.cdt/commit/8f0cf0c6da12732071fd3caf8bb5afa0dadf637e.patch | patch -p1
 git submodule update --init --recursive
 ./build.sh
 popd

@@ -16,7 +16,7 @@ if [[ ! -z "$http_proxy" ]] ; then
     yarn config set strict-ssl false
 fi
 
-npm install -g truffle
+npm install -g truffle --unsafe-perm
 
 dnf install -y --allowerasing --best --refresh \
         --setopt=install_weak_deps=False \
@@ -25,7 +25,7 @@ dnf install -y --allowerasing --best --refresh \
 	bzip2 compat-openssl10 graphviz doxygen openssl-devel \
 	gmp-devel libstdc++-devel python2 python2-devel python3 \
 	python3-devel libedit ncurses-devel swig libcurl-devel \
-	libusb-devel
+	libusb-devel patch
 
 dnf upgrade -y --setopt=install_weak_deps=False --nodocs --allowerasing --best
 rpm -Uvh \

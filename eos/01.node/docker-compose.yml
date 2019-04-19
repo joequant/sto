@@ -3,7 +3,7 @@ version: "3"
 services:
   builder:
     build:
-      context: 01.node
+      context: .
     image: joequant/basedev
 
   nodeosd:
