@@ -14,8 +14,6 @@ if [[ ! -z "$http_proxy" ]] ; then
     yarn config set registry http://registry.yarnpkg.com/
     yarn config set strict-ssl false
 fi
-export USER=root
 npm install -g truffle@v4
 su user -p -c '/bin/bash /tmp/docker-script-user.sh'
 npm config delete registry
-

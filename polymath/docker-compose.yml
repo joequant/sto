@@ -4,6 +4,9 @@ services:
      image: "joequant/polymath"
      stdin_open: true
      tty: true
+     user: user
+     command: "/bin/bash"
+     working_dir: /home/user
      volumes:
        - user-volume:/home/user
      depends_on:
