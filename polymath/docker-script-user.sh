@@ -11,7 +11,7 @@ if [[ ! -z "$http_proxy" ]] ; then
     git config --global http.sslVerify false
 fi
 
-git clone https://github.com/PolymathNetwork/polymath-core.git -b master
+git clone https://github.com/PolymathNetwork/polymath-core.git -b dev-2.2.0
 pushd polymath-core
 rm -f yarn.lock
 yarn
