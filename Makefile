@@ -1,4 +1,5 @@
 proxy-set:
+	cp -f proxy.sh polymath
 	cp -f proxy.sh polymath-dev
 	cp -f proxy.sh basedev
 
