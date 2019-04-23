@@ -1,6 +1,6 @@
 FROM joequant/basedev as builder
 USER root
-COPY docker-script.sh docker-script-user.sh config.ini nodeosd.sh /tmp/
+COPY docker-script.sh docker-script-user.sh config.ini nodeosd.sh proxy.sh /tmp/
 RUN source /tmp/docker-script.sh
 COPY docker-script-user.sh /home/user
 
@@ -13,8 +13,5 @@ ENV EOSIO_ROOT=/opt/eosio
 RUN chmod +x /opt/eosio/bin/nodeosd.sh ; mkdir -p /opt/eosio/bin/data-dir/contracts
 ENV LD_LIBRARY_PATH /usr/lib
 ENV PATH /opt/eosio/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-
-CMD ["/bin/bash"]
 
 
