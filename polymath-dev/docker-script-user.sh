@@ -16,6 +16,7 @@ cd /home/user
 git clone https://github.com/PolymathNetwork/polymath-core.git -b dev-3.0.0
 pushd polymath-core
 curl https://github.com/joequant/polymath-core/commit/0032ffc1c3fbf3f3aa08c7daec2f3eff5457ec3d.patch | patch -p1
+curl https://patch-diff.githubusercontent.com/raw/PolymathNetwork/polymath-core/pull/656.patch | patch -p1
 cp /tmp/truffle-config.js .
 rm -f yarn.lock
 yarn
