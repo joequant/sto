@@ -12,7 +12,7 @@ services:
      depends_on:
        - ganache-cli
   ganache-cli:
-     image: trufflesuite/ganache-cli
+     image: trufflesuite/ganache-cli:v6.2.5
      command: /usr/bin/ganache-cli -l 1000000000
 
 volumes:
