@@ -24,6 +24,14 @@ truffle compile
 rm -f yarn.lock
 popd
 popd
+
+git clone https://github.com/PolymathNetwork/polymath-apps.git -b develop
+pushd polymath-apps
+rm -f yarn.lock
+yarn
+rm -f yarn.lock
+popd
+
 git clone https://github.com/simple-restricted-token/simple-restricted-token.git
 pushd simple-restricted-token
 rm -f yarn.lock
