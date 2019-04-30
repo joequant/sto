@@ -30,6 +30,13 @@ rm -f yarn.lock
 popd
 popd
 
+git clone https://github.com/PolymathNetwork/polymath-apps.git -b develop
+pushd polymath-apps
+rm -f yarn.lock
+yarn
+rm -f yarn.lock
+popd
+
 git clone https://github.com/simple-restricted-token/simple-restricted-token.git
 pushd simple-restricted-token
 cp /tmp/srt/truffle-config.js ./truffle-config.js
@@ -42,5 +49,5 @@ popd
 git config --unset --global http.proxy || true
 git config --unset --global http.sslVerify || true
 git config --unset --global url."http://127.0.0.1:8080/".insteadOf || true
-npm config delete registry
+
 
