@@ -1,0 +1,11 @@
+{
+  "name": "hello-world",
+  "version": "0.0.1",
+  "description": "Test hello world",
+  "author": "Bitquant",
+  "license": "MIT",
+  "dependencies": {
+      "express": "*",
+      "http": "*"
+  }
+}
