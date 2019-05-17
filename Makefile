@@ -2,6 +2,7 @@ proxy-set:
 	cp -f proxy.sh polymath
 	cp -f proxy.sh polymath-dev
 	cp -f proxy.sh basedev
+	cp -f proxy.sh blocksci-server
 	cp -f proxy.sh eos/01.node
 	cp -f proxy.sh eos/02.cdt
 

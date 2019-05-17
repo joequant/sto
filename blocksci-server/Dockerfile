@@ -1,5 +1,7 @@
 FROM ubuntu
 LABEL maintainer="Allen Day allenday@allenday.com"
+COPY proxy.sh /tmp/
+RUN . /tmp/proxy.sh
 RUN apt-get update && apt-get install -y software-properties-common python3-software-properties
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && apt-get update
 RUN apt install -y autoconf autogen build-essential c++17 catch clang-5.0 cmake g++-7 gcc-7 git libargtable2-dev libboost-all-dev libboost-filesystem-dev libboost-iostreams-dev libboost-serialization-dev libboost-test-dev libboost-thread-dev libbz2-dev libcurl4-openssl-dev libgflags-dev libhiredis-dev libjemalloc-dev libjsoncpp-dev libjsonrpccpp-dev libjsonrpccpp-tools liblmdb-dev liblz4-dev libmicrohttpd-dev libsnappy-dev libsparsehash-dev libsqlite3-dev libssl-dev libtool libzstd-dev python3-dev python3-pip wget zlib1g-dev
