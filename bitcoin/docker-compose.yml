@@ -1,9 +1,6 @@
 version:  '3'
 services:
   blocksci-server:
-     stdin_open: true
-     tty: true
-     command: /bin/bash
      build: ./blocksci-server/
      image: "joequant/blocksci-server"
      volumes:
@@ -18,6 +15,8 @@ services:
 
 volumes:
      bitcoin-data:
-
-
-
+#        driver: local
+#        driver_opts:
+#          type: none
+#          o: bind
+#          device: "/home/joe/local0/bitcoin"
