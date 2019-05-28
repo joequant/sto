@@ -1,9 +1,16 @@
 version:  '3'
 services:
-  bitcoind:
-     build: .
+  blocksci-server:
      stdin_open: true
      tty: true
+     command: /bin/bash
+     build: ./blocksci-server/
+     image: "joequant/blocksci-server"
+     volumes:
+       - bitcoin-data:/var/lib/bitcoin
+
+  bitcoind:
+     build: ./bitcoind/
      image: "joequant/bitcoind"
      command: "sudo -u bitcoin /usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf"
      volumes:
