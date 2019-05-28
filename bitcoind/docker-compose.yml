@@ -6,6 +6,11 @@ services:
      tty: true
      image: "joequant/bitcoind"
      command: "sudo -u bitcoin /usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf"
+     volumes:
+       - bitcoin-data:/var/lib/bitcoin
+
+volumes:
+     bitcoin-data:
 
 
 

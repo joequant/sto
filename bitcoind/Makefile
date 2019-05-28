@@ -1,2 +1,7 @@
 target:
-	docker build -t joequant/bitcoind . --no-cache
+	docker-compose build . --no-cache
+
+volume:
+	docker volume create --name bitcoin-data
+
+
