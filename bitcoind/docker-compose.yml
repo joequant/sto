@@ -1,0 +1,11 @@
+version:  '3'
+services:
+  bitcoind:
+     build: .
+     stdin_open: true
+     tty: true
+     image: "joequant/bitcoind"
+     command: "sudo -u bitcoin /usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf"
+
+
+
