@@ -45,4 +45,5 @@ make install
 mkdir /data
 cp /tmp/startup.sh /data/startup.sh
 cp /tmp/update_blocksci.sh /data/update-blocksci.sh
+chmod a+ /dev/update-blocksci.sh
 crontab -l | { cat ; echo "*/5 * * * * /data/update-blocksci.sh"; } | crontab
