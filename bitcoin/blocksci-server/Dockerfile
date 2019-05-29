@@ -1,5 +1,4 @@
 FROM ubuntu
-LABEL maintainer="Allen Day allenday@allenday.com"
-COPY proxy.sh build-blocksci.sh startup.sh update-blocksci.sh /tmp/
+LABEL maintainer="Joseph Wang joequant@gmail.com"
+COPY proxy.sh build-blocksci.sh startup.sh /tmp/
 RUN . /tmp/build-blocksci.sh
-WORKDIR /data

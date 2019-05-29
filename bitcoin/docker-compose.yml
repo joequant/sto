@@ -2,9 +2,13 @@ version:  '3'
 services:
   blocksci-server:
      build: ./blocksci-server/
+     stdin_open: true
+     tty: true
      image: "joequant/blocksci-server"
+     command: /root/startup.sh
      volumes:
        - bitcoin-data:/var/lib/bitcoin
+       - blocksci-data:/var/lib/blocksci
 
   bitcoind:
      build: ./bitcoind/
@@ -19,4 +23,10 @@ volumes:
 #        driver_opts:
 #          type: none
 #          o: bind
-#          device: "/home/joe/local0/bitcoin"
+#          device: /home/joe/local0/bitcoin
+     blocksci-data:
+#        driver: local
+#        driver_opts:
+#          type: none
+#          o: bind
+#          device: /home/joe/local0/blocksci
