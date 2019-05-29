@@ -43,3 +43,6 @@ cd /root/BlockSci/external/bitcoin-api-cpp/release
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
 make install
 mkdir /data
+cp /tmp/startup.sh /data/startup.sh
+cp /tmp/update_blocksci.sh /data/update-blocksci.sh
+crontab -l | { cat ; echo "*/5 * * * * /data/update-blocksci.sh"; } | crontab
