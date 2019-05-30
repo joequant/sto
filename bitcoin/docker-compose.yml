@@ -2,8 +2,6 @@ version:  '3'
 services:
   blocksci-server:
      build: ./blocksci-server/
-     stdin_open: true
-     tty: true
      image: "joequant/blocksci-server"
      command: /root/startup.sh
      volumes:
@@ -13,20 +11,21 @@ services:
   bitcoind:
      build: ./bitcoind/
      image: "joequant/bitcoind"
-     command: "sudo -u bitcoin /usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf"
+     user: bitcoin
+     command: "/usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf"
      volumes:
        - bitcoin-data:/var/lib/bitcoin
 
 volumes:
      bitcoin-data:
-#        driver: local
-#        driver_opts:
-#          type: none
-#          o: bind
-#          device: /home/joe/local0/bitcoin
+        driver: local
+        driver_opts:
+          type: none
+          o: bind
+          device: ${DIR}/bitcoin
      blocksci-data:
-#        driver: local
-#        driver_opts:
-#          type: none
-#          o: bind
-#          device: /home/joe/local0/blocksci
+        driver: local
+        driver_opts:
+          type: none
+          o: bind
+          device: ${DIR}/blocksci
