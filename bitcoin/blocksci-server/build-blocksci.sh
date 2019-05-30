@@ -46,19 +46,12 @@ cd /root/BlockSci/
 CC=gcc-7 CXX=g++-7 pip3 install -e blockscipy
 
 pip3 install --upgrade pip
-pip3 install --upgrade multiprocess psutil pycrypto matplotlib pandas dateparser rpyc
+pip3 install --upgrade rpyc
 
 mkdir /root/BlockSci/external/bitcoin-api-cpp/release
 cd /root/BlockSci/external/bitcoin-api-cpp/release
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
 make install
-
-mkdir /var/lib/blocksci
-mkdir /var/lib/bitcoin
-cp /tmp/startup.sh /root/startup.sh
-chmod a+x /root/startup.sh
-crontab -l | { cat ; echo "*/5 * * * * blocksci_parser /root/blocksci_config update"; } | crontab
-/usr/bin/blocksci_parser /root/blocksci_config generate-config bitcoin /var/lib/blocksci --disk /var/lib/bitcoin
 
 # Reset npm registry
 git config --unset --global http.proxy || true
