@@ -45,9 +45,6 @@ make install
 cd /root/BlockSci/
 CC=gcc-7 CXX=g++-7 pip3 install -e blockscipy
 
-pip3 install --upgrade pip
-pip3 install --upgrade rpyc
-
 mkdir /root/BlockSci/external/bitcoin-api-cpp/release
 cd /root/BlockSci/external/bitcoin-api-cpp/release
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
