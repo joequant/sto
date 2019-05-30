@@ -4,6 +4,8 @@ services:
      build: ./blocksci-server/
      image: "joequant/blocksci-server"
      command: /root/startup.sh
+     ports:
+       - 18812:18812
      volumes:
        - bitcoin-data:/var/lib/bitcoin
        - blocksci-data:/var/lib/blocksci
