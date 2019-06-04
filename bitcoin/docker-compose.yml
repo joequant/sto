@@ -3,18 +3,20 @@ services:
   blocksci-server:
      build: ./blocksci-server/
      image: "joequant/blocksci-server"
-     command: /root/startup.sh
+     command: /root/apps/startup.sh
      ports:
        - 18812:18812
+       - 5000:5000
      volumes:
        - bitcoin-data:/var/lib/bitcoin
        - blocksci-data:/var/lib/blocksci
+       - apps:/root/apps
 
   bitcoind:
      build: ./bitcoind/
      image: "joequant/bitcoind"
      user: bitcoin
-     command: "/usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf"
+     command: "/usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf -dbcache=8000"
      volumes:
        - bitcoin-data:/var/lib/bitcoin
 
@@ -31,3 +33,9 @@ volumes:
           type: none
           o: bind
           device: ${DIR}/blocksci
+     apps:
+        driver: local
+        driver_opts:
+          type: none
+          o: bind
+          device: ${DIR}/apps
