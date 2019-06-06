@@ -16,7 +16,7 @@ services:
      build: ./bitcoind/
      image: "joequant/bitcoind"
      user: bitcoin
-     command: "/usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf -dbcache=8000"
+     command: "/usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf"
      volumes:
        - bitcoin-data:/var/lib/bitcoin
 
