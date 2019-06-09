@@ -1,5 +1,5 @@
 #!/bin/bash
-pip3 install --upgrade rpyc python-daemon lockfile Flask gevent
+pip3 install --upgrade rpyc python-daemon lockfile Flask gevent bitcoin-etl
 
 mkdir /var/lib/blocksci
 mkdir /var/lib/bitcoin
