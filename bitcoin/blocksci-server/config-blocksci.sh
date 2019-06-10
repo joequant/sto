@@ -1,8 +1,11 @@
 #!/bin/bash
 pip3 install --upgrade rpyc python-daemon lockfile Flask gevent bitcoin-etl
 
+add-apt-repository -y ppa:bitcoin/bitcoin
+apt-get update -y 
+apt-get install -y bitcoind
+
 mkdir /var/lib/blocksci
-mkdir /var/lib/bitcoin
 mkdir /root/apps
 cd /tmp
 cp startup.sh rpycd.py rpycd.conf app-server.py /root/apps
