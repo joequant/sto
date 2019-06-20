@@ -7,6 +7,7 @@ services:
      ports:
        - 18812:18812
        - 5000:5000
+       - 8888:8888
      volumes:
        - bitcoin-data:/var/lib/bitcoin
        - blocksci-data:/var/lib/blocksci
@@ -19,7 +20,7 @@ services:
      ports:
        - 8332:8332
 # add dbcache=8000 for initial load
-     command: "/usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf --txindex=1 --rpcallowip=172.27.0.0/255.255.255.0 --rpcallowip=127.0.0.1/255.255.255.255 --rpcuser=bitcoin --rpcpassword=bitcoin"
+     command: "/usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf --txindex=1 --rpcallowip=172.27.0.0/255.255.255.0 --rpcallowip=127.0.0.1/255.255.255.255 --rpcuser=bitcoin --rpcpassword=bitcoin --dbcache=16000"
      volumes:
        - bitcoin-data:/var/lib/bitcoin
 
