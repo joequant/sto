@@ -4,7 +4,7 @@ pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas
 
 add-apt-repository -y ppa:bitcoin/bitcoin
 apt-get update -y 
-apt-get install -y bitcoind
+apt-get install -y bitcoind graphviz
 
 mkdir /var/lib/blocksci
 mkdir /root/apps
