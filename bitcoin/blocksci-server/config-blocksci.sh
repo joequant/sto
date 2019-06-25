@@ -1,6 +1,6 @@
 #!/bin/bash
 pip3 install --upgrade rpyc python-daemon lockfile Flask gevent bitcoin-etl
-pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser graphviz
+pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser graphviz python-rocksdb
 
 add-apt-repository -y ppa:bitcoin/bitcoin
 apt-get update -y 
