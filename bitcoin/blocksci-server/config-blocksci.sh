@@ -1,14 +1,18 @@
 #!/bin/bash
+. /tmp/proxy.sh
 pip3 install --upgrade rpyc python-daemon lockfile Flask gevent bitcoin-etl
 pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser graphviz python-rocksdb
 
-add-apt-repository -y ppa:bitcoin/bitcoin
-apt-get update -y 
-apt-get install -y bitcoind graphviz
+#add-apt-repository -y ppa:bitcoin/bitcoin
+#apt-get update -y
+#apt-get install -y bitcoind
+apt-get install -y graphviz
 
-mkdir /var/lib/blocksci
-mkdir /root/apps
+mkdir -p /var/lib/bitcoin
+mkdir -p /var/lib/blocksci
+mkdir -p /root/apps
+
 cd /tmp
-cp startup.sh rpycd.py rpycd.conf app-server.py hello-world.py /root/apps
+cp startup.sh rpycd.py rpycd.conf app-server.py hello-world.py jupyter_notebook_config.py /root/apps
 chmod a+x /root/apps/startup.sh
 /usr/bin/blocksci_parser /root/apps/blocksci_config generate-config bitcoin /var/lib/blocksci --disk /var/lib/bitcoin -m -6
