@@ -1,7 +1,7 @@
 #!/bin/bash
 . /tmp/proxy.sh
 pip3 install --upgrade rpyc python-daemon lockfile Flask gevent bitcoin-etl
-pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser graphviz python-rocksdb
+pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser graphviz python-rocksdb sqlalchemy
 
 #add-apt-repository -y ppa:bitcoin/bitcoin
 #apt-get update -y

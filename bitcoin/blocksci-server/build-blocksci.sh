@@ -20,7 +20,7 @@ cd /root
 git clone https://github.com/bitcoin-core/secp256k1
 cd /root/secp256k1
 sh ./autogen.sh
-./configure --enable-module-recovery --prefix=/usr
+./configure --enable-module-recovery --enable-debug --prefix=/usr
 make install
 cd /root
 git clone https://github.com/citp/BlockSci.git
@@ -39,11 +39,11 @@ make shared_lib
 make install
 
 cd /root/BlockSci/release
-CC=gcc-7 CXX=g++-7 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+CC=gcc-7 CXX=g++-7 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
 make install
 
 cd /root/BlockSci/
-CC=gcc-7 CXX=g++-7 pip3 install -e blockscipy
+CC=gcc-7 CXX=g++-7 pip3 install -v --no-binary :all: --global-option build --global-option --debug -e blockscipy
 
 mkdir /root/BlockSci/external/bitcoin-api-cpp/release
 cd /root/BlockSci/external/bitcoin-api-cpp/release
