@@ -1,12 +1,13 @@
 #!/bin/bash
 . /tmp/proxy.sh
-pip3 install --upgrade rpyc python-daemon lockfile Flask gevent bitcoin-etl
-pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser graphviz python-rocksdb sqlalchemy
 
 #add-apt-repository -y ppa:bitcoin/bitcoin
 #apt-get update -y
 #apt-get install -y bitcoind
-apt-get install -y graphviz
+apt-get install -y graphviz gdb google-perftools
+
+pip3 install --upgrade rpyc python-daemon lockfile Flask gevent bitcoin-etl
+pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser graphviz python-rocksdb sqlalchemy yep pybind11 sortedcontainers
 
 mkdir -p /var/lib/bitcoin
 mkdir -p /var/lib/blocksci
