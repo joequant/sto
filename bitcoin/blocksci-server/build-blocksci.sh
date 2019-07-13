@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 . /tmp/proxy.sh
 
@@ -29,12 +30,20 @@ git submodule init
 git submodule update --recursive
 git fetch origin 'v0.6':'v0.6'
 git checkout 'v0.6'
+
 ln -s external libs
 cp -r libs/range-v3/include/meta /usr/local/include
 cp -r libs/range-v3/include/range /usr/local/include
+
+
 mkdir -p /root/BlockSci/release
 cd /root/BlockSci/external/rocksdb
 git checkout v6.1.2
+git config --global user.email "you@example.com"
+git config --global user.name "Example"
+cd ..
+git commit rocksdb -m "v6.1.2"
+cd rocksdb
 #CXXFLAGS="-Wno-error=deprecated-copy -Wno-error=pessimizing-move"
 make static_lib
 #CXXFLAGS="-Wno-error=deprecated-copy -Wno-error=pessimizing-move"
@@ -42,10 +51,7 @@ make shared_lib
 make install
 
 cd /root/BlockSci/release
-CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
-cd /root/BlockSci/external/rocksdb
-git checkout v6.1.2
-cd /root/BlockSci/release
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
 make install
 
 cd /root/BlockSci/
