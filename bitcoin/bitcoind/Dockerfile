@@ -1,4 +1,4 @@
-FROM mageia:7
+FROM joequant/cauldron
 LABEL maintainer="Joseph Wang joequant@gmail.com"
 COPY proxy.sh build-bitcoind.sh /tmp/
 RUN . /tmp/build-bitcoind.sh

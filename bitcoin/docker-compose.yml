@@ -12,15 +12,17 @@ services:
        - bitcoin-data:/var/lib/bitcoin
        - blocksci-data:/var/lib/blocksci
        - apps:/root/apps
-
+       - mnt:/mnt
+     environment:
+       - LD_PRELOAD=libjemalloc.so
 
   bitcoind:
      build: ./bitcoind/
      image: "joequant/bitcoind"
-     ports:
-       - 8332:8332
 # add dbcache=8000 for initial load
      command: "/usr/bin/bitcoind -datadir=/var/lib/bitcoin -pid=/run/bitcoin/bitcoin.pid -conf=/etc/bitcoin.conf --txindex=1 --rpcallowip=172.27.0.0/255.255.255.0 --rpcallowip=127.0.0.1/255.255.255.255 --rpcuser=bitcoin --rpcpassword=bitcoin --dbcache=16000"
+     ports:
+       - 8332:8332
      volumes:
        - bitcoin-data:/var/lib/bitcoin
 
@@ -31,6 +33,12 @@ volumes:
           type: none
           o: bind
           device: ${DIR}/bitcoin
+     mnt:
+        driver: local
+        driver_opts:
+          type: none
+          o: bind
+          device: ${DIR}
      blocksci-data:
         driver: local
         driver_opts:

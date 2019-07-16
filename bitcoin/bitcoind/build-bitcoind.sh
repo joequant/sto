@@ -2,9 +2,7 @@
 set -e
 . /tmp/proxy.sh
 
-urpmi bitcoind sudo
-
-rpm --erase info-install
+dnf install -y bitcoind sudo
 dnf clean all
 rm -f /var/log/*.log
 rm -rf /var/cache/dnf/*

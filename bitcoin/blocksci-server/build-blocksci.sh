@@ -2,11 +2,12 @@
 
 . /tmp/proxy.sh
 
+set -e
 
 apt-get update && apt-get install -y software-properties-common python3-software-properties
 add-apt-repository ppa:ubuntu-toolchain-r/test -y && apt-get update
-apt install -y autoconf autogen build-essential c++17 catch clang cmake g++-8 gcc-8 git libargtable2-dev libboost-all-dev libboost-filesystem-dev libboost-iostreams-dev libboost-serialization-dev libboost-test-dev libboost-thread-dev libbz2-dev libcurl4-openssl-dev libgflags-dev libhiredis-dev libjemalloc-dev libjsoncpp-dev libjsonrpccpp-dev libjsonrpccpp-tools liblmdb-dev liblz4-dev libmicrohttpd-dev libsnappy-dev libsparsehash-dev libsqlite3-dev libssl-dev libtool libzstd-dev python3-dev python3-pip wget zlib1g-dev
-update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+apt install -y autoconf autogen build-essential c++17 catch clang cmake g++-7 gcc-7 git libargtable2-dev libboost-all-dev libboost-filesystem-dev libboost-iostreams-dev libboost-serialization-dev libboost-test-dev libboost-thread-dev libbz2-dev libcurl4-openssl-dev libgflags-dev libhiredis-dev libjemalloc-dev libjsoncpp-dev libjsonrpccpp-dev libjsonrpccpp-tools liblmdb-dev liblz4-dev libmicrohttpd-dev libsnappy-dev libsparsehash-dev libsqlite3-dev libssl-dev libtool libzstd-dev python3-dev python3-pip wget zlib1g-dev
+update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
 
 if [ ! -z "$http_proxy" ] ; then
     git config --global http.proxy $http_proxy
@@ -34,22 +35,16 @@ cp -r libs/range-v3/include/meta /usr/local/include
 cp -r libs/range-v3/include/range /usr/local/include
 mkdir -p /root/BlockSci/release
 cd /root/BlockSci/external/rocksdb
-git checkout v6.1.2
-#CXXFLAGS="-Wno-error=deprecated-copy -Wno-error=pessimizing-move"
 make static_lib
-#CXXFLAGS="-Wno-error=deprecated-copy -Wno-error=pessimizing-move"
 make shared_lib
 make install
 
 cd /root/BlockSci/release
-CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
-cd /root/BlockSci/external/rocksdb
-git checkout v6.1.2
-cd /root/BlockSci/release
+CC=gcc-7 CXX=g++-7 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
 make install
 
 cd /root/BlockSci/
-CC=gcc CXX=g++ pip3 install -v --no-binary :all: --global-option build --global-option --debug -e blockscipy
+CC=gcc-7 CXX=g++-7 pip3 install -v --no-binary :all: --global-option build --global-option --debug -e blockscipy
 
 mkdir /root/BlockSci/external/bitcoin-api-cpp/release
 cd /root/BlockSci/external/bitcoin-api-cpp/release
