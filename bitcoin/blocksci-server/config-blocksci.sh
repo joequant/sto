@@ -7,7 +7,9 @@
 apt-get install -y graphviz gdb google-perftools
 
 pip3 install --upgrade rpyc python-daemon lockfile Flask gevent bitcoin-etl
-pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser graphviz python-rocksdb sqlalchemy yep pybind11 sortedcontainers
+pip3 install --upgrade multiprocess psutil jupyterlab pycrypto matplotlib pandas dateparser \
+     graphviz python-rocksdb sqlalchemy yep pybind11 sortedcontainers \
+     seaborn
 
 mkdir -p /var/lib/bitcoin
 mkdir -p /var/lib/blocksci
