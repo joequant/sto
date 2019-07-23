@@ -1,0 +1,124 @@
+From 5116a6a67a8b63188c221300a1b53af0509a293a Mon Sep 17 00:00:00 2001
+From: Daniel Black <daniel@linux.ibm.com>
+Date: Fri, 18 May 2018 13:23:57 +1000
+Subject: [PATCH 1/3] Remove bogus gcc-8.1 warning / use std::strdup
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+gcc-8 generated with warning below. std::strdup is the function used.
+
+Windows lists strdup as depreciated in favour of _strdup
+(https://docs.microsoft.com/en-au/cpp/c-runtime-library/reference/strdup-wcsdup)
+
+Return null if memory couldn't be allocated.
+
+util/status.cc: In static member function ‘static const char* rocksdb::Status::CopyState(const char*)’:
+util/status.cc:28:15: error: ‘char* strncpy(char*, const char*, size_t)’ output truncated before terminating nul copying as many bytes from a string as its length [-Werror=stringop-truncation]
+   std::strncpy(result, state, cch - 1);
+   ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+util/status.cc:19:18: note: length computed here
+       std::strlen(state) + 1; // +1 for the null terminator
+       ~~~~~~~~~~~^~~~~~~
+cc1plus: all warnings being treated as errors
+make: *** [Makefile:645: shared-objects/util/status.o] Error 1
+---
+ util/status.cc | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
+
+diff --git a/util/status.cc b/util/status.cc
+index 319b0d9a4e..a154a36ac7 100644
+--- a/util/status.cc
++++ b/util/status.cc
+@@ -10,24 +10,17 @@
+ #include "rocksdb/status.h"
+ #include <stdio.h>
+ #include <cstring>
++#include <string.h>
+ #include "port/port.h"
+ 
+ namespace rocksdb {
+ 
+ const char* Status::CopyState(const char* state) {
+-  const size_t cch =
+-      std::strlen(state) + 1; // +1 for the null terminator
+-  char* const result =
+-      new char[cch];
+-  result[cch - 1] = '\0';
+ #ifdef OS_WIN
+-  errno_t ret;
+-  ret = strncpy_s(result, cch, state, cch - 1);
+-  assert(ret == 0);
++  return _strdup(state);
+ #else
+-  std::strncpy(result, state, cch - 1);
++  return strdup(state);
+ #endif
+-  return result;
+ }
+ 
+ Status::Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2)
+
+From 72f399883bbf63b49371ea587778d8f7dd579a4a Mon Sep 17 00:00:00 2001
+From: Daniel Black <daniel@linux.ibm.com>
+Date: Mon, 25 Jun 2018 09:21:10 +1000
+Subject: [PATCH 2/3] free, instead of delete[] on Status.state_
+
+---
+ include/rocksdb/status.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/include/rocksdb/status.h b/include/rocksdb/status.h
+index 3573d37e32..c803f89bb0 100644
+--- a/include/rocksdb/status.h
++++ b/include/rocksdb/status.h
+@@ -26,7 +26,7 @@ class Status {
+  public:
+   // Create a success status.
+   Status() : code_(kOk), subcode_(kNone), state_(nullptr) {}
+-  ~Status() { delete[] state_; }
++  ~Status() { free((void *) state_); }
+ 
+   // Copy the specified status.
+   Status(const Status& s);
+@@ -284,7 +284,7 @@ inline Status& Status::operator=(const Status& s) {
+   if (this != &s) {
+     code_ = s.code_;
+     subcode_ = s.subcode_;
+-    delete[] state_;
++    free((void *) state_);
+     state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_);
+   }
+   return *this;
+@@ -308,7 +308,7 @@ inline Status& Status::operator=(Status&& s)
+     s.code_ = kOk;
+     subcode_ = std::move(s.subcode_);
+     s.subcode_ = kNone;
+-    delete[] state_;
++    free((void *)state_);
+     state_ = nullptr;
+     std::swap(state_, s.state_);
+   }
+
+From 13b7972abc0e741e18bee722df525f53dfb7f653 Mon Sep 17 00:00:00 2001
+From: Daniel Black <daniel@linux.ibm.com>
+Date: Tue, 26 Jun 2018 10:59:42 +1000
+Subject: [PATCH 3/3] Status.state_ use new -> malloc for consistency
+
+---
+ util/status.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/util/status.cc b/util/status.cc
+index a154a36ac7..f302d2eada 100644
+--- a/util/status.cc
++++ b/util/status.cc
+@@ -30,7 +30,7 @@ Status::Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2
+   const size_t len1 = msg.size();
+   const size_t len2 = msg2.size();
+   const size_t size = len1 + (len2 ? (2 + len2) : 0);
+-  char* const result = new char[size + 1];  // +1 for null terminator
++  char* const result = (char*) malloc(size + 1);  // +1 for null terminator
+   memcpy(result, msg.data(), len1);
+   if (len2) {
+     result[len1] = ':';
