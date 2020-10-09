@@ -3,11 +3,12 @@ services:
   core-dev:
      image: "joequant/core-dev"
      volumes:
-       - user:/home/user
+       - type: bind
+         source: ./user
+         target: /home/user
        - log:/var/log
      environment:
        - INSTANCE_NAME=core-dev
 
 volumes:
-      user:
       log:
