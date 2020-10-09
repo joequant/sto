@@ -1,0 +1,9 @@
+{
+    "name": "bitstation",
+    "scripts": {
+	"build": "buildah unshare /bin/bash ./install.sh",
+	"up": "nohup podman-compose up >> log &",
+	"down": "podman-compose down",
+	"shell": "podman exec -ti core-dev_core-dev_1 /bin/bash"
+    }
+}
