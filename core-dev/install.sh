@@ -33,7 +33,25 @@ dnf upgrade --best --nodocs --allowerasing --refresh -y \
 
 dnf --setopt=install_weak_deps=False --best --allowerasing install -v -y --nodocs $rootfsArg \
       npm \
-      nodejs
+      nodejs \
+      golang \
+      git \
+      make
+
+buildah run $container -- npm install -g --unsafe-perm=true truffle ganache-cli
+cat <<EOF > $rootfsDir/tmp/build-geth.sh
+pushd /tmp
+git clone --depth=1 https://github.com/ethereum/go-ethereum.git
+pushd go-ethereum
+make geth
+popd
+mv go-ethereum/build/bin/geth /usr/bin
+popd
+EOF
+
+chmod a+rwx $rootfsDir/tmp/*.sh
+buildah run $container -- cat /tmp/build-geth.sh
+buildah run $container -- /bin/bash /tmp/build-geth.sh
 
 cp $scriptDir/startup.sh $rootfsDir/sbin/startup.sh
 chmod a+rwx $rootfsDir/sbin/startup.sh
