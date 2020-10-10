@@ -38,7 +38,7 @@ dnf --setopt=install_weak_deps=False --best --allowerasing install -v -y --nodoc
       git \
       make
 
-buildah run $container -- npm install -g --unsafe-perm=true truffle ganache-cli
+buildah run $container -- npm install -g --unsafe-perm=true truffle ganache-cli solc
 
 cp $scriptDir/*.sh $rootfsDir/tmp
 chmod a+rwx $rootfsDir/tmp/*.sh
