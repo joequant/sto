@@ -1,0 +1,13 @@
+version:  '3'
+services:
+  etherbench:
+     image: "joequant/etherbench"
+     volumes:
+       - type: bind
+         source: ./data/user
+         target: /home/user
+       - type: bind
+         source: ./data/log
+         target: /var/log
+     environment:
+       - INSTANCE_NAME=etherbench

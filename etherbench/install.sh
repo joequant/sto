@@ -16,7 +16,7 @@ export rootfsRpmArg="--root $mountpoint"
 export LC_ALL=C
 export LANGUAGE=C
 export LANG=C
-name="joequant/core-dev"
+name="joequant/etherbench"
 
 set -e -v
 
@@ -39,19 +39,23 @@ dnf --setopt=install_weak_deps=False --best --allowerasing install -v -y --nodoc
       make
 
 buildah run $container -- npm install -g --unsafe-perm=true truffle ganache-cli
-cat <<EOF > $rootfsDir/tmp/build-geth.sh
-pushd /tmp
-git clone --depth=1 https://github.com/ethereum/go-ethereum.git
-pushd go-ethereum
-make geth
-popd
-mv go-ethereum/build/bin/geth /usr/bin
-popd
-EOF
 
+cp $scriptDir/*.sh $rootDir/tmp
 chmod a+rwx $rootfsDir/tmp/*.sh
 buildah run $container -- cat /tmp/build-geth.sh
 buildah run $container -- /bin/bash /tmp/build-geth.sh
+buildah run $container -- /bin/bash /tmp/install-user.sh
+
+rpm --rebuilddb --root $rootfsDir
+pushd $rootfsDir
+rm -rf var/cache/*
+rm -f lib/*.so lib/*.so.* lib64/*.a lib/*.a lib/*.o
+rm -rf usr/lib/.build-id usr/lib64/mesa
+rm -rf usr/local usr/games
+rm -rf usr/lib/gcc/*/*/32
+#modclean seems to interfere with verdaccio
+#https://github.com/verdaccio/verdaccio/issues/1883
+popd
 
 cp $scriptDir/startup.sh $rootfsDir/sbin/startup.sh
 chmod a+rwx $rootfsDir/sbin/startup.sh
