@@ -16,3 +16,6 @@ npm i --save @openzeppelin/contracts
 npm i --save truffle-hdwallet-provider
 truffle compile
 popd
+pushd CORE-v1
+npm i --save
+popd

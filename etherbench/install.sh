@@ -36,7 +36,11 @@ dnf --setopt=install_weak_deps=False --best --allowerasing install -v -y --nodoc
       nodejs \
       golang \
       git \
-      make
+      make \
+      gcc-c++ \
+      libudev-devel \
+      libusb1-devel \
+      glibc-devel
 
 buildah run $container -- npm install -g --unsafe-perm=true truffle ganache-cli solc
 
@@ -49,7 +53,7 @@ buildah run $container -- /bin/bash /tmp/install-user.sh
 rpm --rebuilddb --root $rootfsDir
 pushd $rootfsDir
 rm -rf var/cache/*
-rm -f lib/*.so lib/*.so.* lib64/*.a lib/*.a lib/*.o
+rm -f lib/*.so lib/*.so.* lib/*.a lib/*.o
 rm -rf usr/lib/.build-id usr/lib64/mesa
 rm -rf usr/local usr/games
 rm -rf usr/lib/gcc/*/*/32
