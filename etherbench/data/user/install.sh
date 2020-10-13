@@ -13,7 +13,8 @@ npm i --save @uniswap/v2-periphery
 npm i --save @nomiclabs/buidler
 npm i --save @openzeppelin/contracts-ethereum-package
 npm i --save @openzeppelin/contracts
-npm i --save truffle-hdwallet-provider
+npm i --save @truffle/hdwallet-provider
+npm i --save fs
 truffle compile
 popd
 pushd CORE-v1

@@ -40,14 +40,19 @@ dnf --setopt=install_weak_deps=False --best --allowerasing install -v -y --nodoc
       gcc-c++ \
       libudev-devel \
       libusb1-devel \
-      glibc-devel
+      glibc-devel \
+      distcc
+
+# openethereum
+#      cargo \
+#      clang \
+#      llvm-devel
 
 buildah run $container -- npm install -g --unsafe-perm=true truffle ganache-cli solc
 
 cp $scriptDir/*.sh $rootfsDir/tmp
 chmod a+rwx $rootfsDir/tmp/*.sh
-buildah run $container -- cat /tmp/build-geth.sh
-buildah run $container -- /bin/bash /tmp/build-geth.sh
+buildah run $container -- /bin/bash /tmp/install-build.sh
 buildah run $container -- /bin/bash /tmp/install-user.sh
 
 rpm --rebuilddb --root $rootfsDir
