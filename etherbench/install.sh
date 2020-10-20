@@ -41,7 +41,8 @@ dnf --setopt=install_weak_deps=False --best --allowerasing install -v -y --nodoc
       libudev-devel \
       libusb1-devel \
       glibc-devel \
-      distcc
+      distcc \
+      vim-minimal
 
 # openethereum
 #      cargo \
