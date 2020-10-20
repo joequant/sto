@@ -63,6 +63,7 @@ rm -f lib/*.so lib/*.so.* lib/*.a lib/*.o
 rm -rf usr/lib/.build-id usr/lib64/mesa
 rm -rf usr/local usr/games
 rm -rf usr/lib/gcc/*/*/32
+rm -rf tmp/*
 #modclean seems to interfere with verdaccio
 #https://github.com/verdaccio/verdaccio/issues/1883
 popd
@@ -71,5 +72,5 @@ cp $scriptDir/startup.sh $rootfsDir/sbin/startup.sh
 chmod a+rwx $rootfsDir/sbin/startup.sh
 buildah config --user user $container
 buildah config --cmd "/sbin/startup.sh" $container
-buildah commit --format docker --rm $container $name
+buildah commit --squash --format docker --rm $container $name
 
