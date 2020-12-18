@@ -8,16 +8,18 @@ class Defibot:
         script_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(script_dir, 'config.json')) as f:
             self._config = json5.load(f)
+        self._uniswap = None
         self._web3 = Web3(Web3.HTTPProvider(self.config('provider')))
-        self._uniswap = Uniswap(self.config('address'),
-                                self.config('private_key'),
-                                web3=self.web3(),
-                                version=1)
     def config(self, s):
         return self._config[s]
     def web3(self):
         return self._web3
     def uniswap(self):
+        if self._uniswap is None:
+            self._uniswap = Uniswap(self.config('address'),
+                                    self.config('private_key'),
+                                    web3=self.web3(),
+                                    version=1)
         return self._uniswap
     def pending_txns(self):
         return None
@@ -35,7 +37,9 @@ class Defibot:
                                   Web3.toChecksumAddress(self.config('token')),
                                   "fromBlock": "pending",
                                   "toBlock": "pending"})
-#transaction_hashes = web3.eth.getFilterChanges(web3_filter.filter_id)
+        web3_pending_filter = self._web3.eth.filter('pending')
+        transaction_hashes = self._web3.eth.getFilterChanges(web3_pending_filter.filter_id)
+        print(transaction_hashes)
 #transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
     def test_uniswap(self):
         print(self.uniswap().exchange_address_from_token(Web3.toChecksumAddress("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599")))
