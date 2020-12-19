@@ -45,6 +45,7 @@ class Defibot:
         web3_pending_filter = web3.eth.filter('latest')
         transaction_hashes = web3.eth.getFilterChanges(web3_pending_filter.filter_id)
         s = ""
+        s += repr(web3.geth.txpool.status())
         s += repr(transaction_hashes)
         s += repr(web3_pending_filter.get_new_entries())
         return s
