@@ -36,13 +36,14 @@ class Defibot:
         trades = self.process(pending)
         self.trade(trades)
     def test_pending(self):
+        web3 = self.web3()
         event_filter = \
-            self._web3.eth.filter({"address":
-                                  Web3.toChecksumAddress(self.config('token')),
-                                  "fromBlock": "pending",
-                                  "toBlock": "pending"})
-        web3_pending_filter = self._web3.eth.filter('pending')
-        transaction_hashes = self._web3.eth.getFilterChanges(web3_pending_filter.filter_id)
+            web3.eth.filter({"address":
+                             Web3.toChecksumAddress(self.config('token')),
+                             "fromBlock": "pending",
+                             "toBlock": "pending"})
+        web3_pending_filter = web3.eth.filter('pending')
+        transaction_hashes = web3.eth.getFilterChanges(web3_pending_filter.filter_id)
         print(transaction_hashes)
 #transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
     def test_uniswap(self):

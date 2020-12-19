@@ -2,7 +2,7 @@
 sudo urpmi python3-devel
 pip install web3
 pip install poetry
-pip install git+git://github.com/shanefontaine/uniswap-python.git
+pip install git+git://github.com/joequant/uniswap-python.git
 podman pull ethereum/client-go
 
 
