@@ -4,6 +4,17 @@ from web3 import Web3
 from uniswap import Uniswap
 import requests
 from requests.exceptions import HTTPError
+import asyncio
+
+def handle_event(event):
+    print(event)
+    # and whatever
+
+async def log_loop(event_filter, poll_interval):
+    while True:
+        for event in event_filter.get_new_entries():
+            handle_event(event)
+        await asyncio.sleep(poll_interval)
 
 class Defibot:
     def __init__(self):
@@ -59,3 +70,14 @@ class Defibot:
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
         response.raise_for_status()
         return response.json()
+    def test_eventloop(self):
+        w3 = self.web3()
+        block_filter = w3.eth.filter('latest')
+        tx_filter = w3.eth.filter('pending')
+        loop = asyncio.get_event_loop()
+        try:
+            loop.run_until_complete(
+                asyncio.gather(
+                    log_loop(tx_filter, 2)))
+        finally:
+            loop.close()
