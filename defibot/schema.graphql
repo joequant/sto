@@ -1,3 +1,5 @@
 type Query {
   hello: String!
+  testuniswap: String!
+  testpending: String!
 }

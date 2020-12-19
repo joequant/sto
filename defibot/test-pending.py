@@ -2,5 +2,5 @@
 import defibotlocal
 
 dfb = defibotlocal.DefibotLocal()
-dfb.test_pending()
+print(dfb.test_pending())
 

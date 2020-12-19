@@ -2,5 +2,5 @@
 import defibotlocal
 
 dfb = defibotlocal.DefibotLocal()
-dfb.test_uniswap()
+print(dfb.test_uniswap())
 
