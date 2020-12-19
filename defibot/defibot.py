@@ -2,6 +2,8 @@ import os
 import json5
 from web3 import Web3
 from uniswap import Uniswap
+import requests
+from requests.exceptions import HTTPError
 
 class Defibot:
     def __init__(self):
@@ -9,10 +11,12 @@ class Defibot:
         with open(os.path.join(script_dir, 'config.json')) as f:
             self._config = json5.load(f)
         self._uniswap = None
-        self._web3 = Web3(Web3.HTTPProvider(self.config('provider')))
+        self._web3 = None
     def config(self, s):
         return self._config[s]
     def web3(self):
+        if self._web3 is None:
+            self._web3 = Web3(Web3.HTTPProvider(self.config('provider')))
         return self._web3
     def uniswap(self):
         if self._uniswap is None:
@@ -44,3 +48,7 @@ class Defibot:
     def test_uniswap(self):
         print(self.uniswap().exchange_address_from_token(Web3.toChecksumAddress("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599")))
         print(self.uniswap().get_fee_maker())
+    def gasnow(self):
+        response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
+        response.raise_for_status()
+        return response.json()
