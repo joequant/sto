@@ -42,9 +42,10 @@ class Defibot:
                              Web3.toChecksumAddress(self.config('token')),
                              "fromBlock": "pending",
                              "toBlock": "pending"})
-        web3_pending_filter = web3.eth.filter('pending')
+        web3_pending_filter = web3.eth.filter('latest')
         transaction_hashes = web3.eth.getFilterChanges(web3_pending_filter.filter_id)
         print(transaction_hashes)
+        print(web3_pending_filter.get_new_entries())
 #transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
     def test_uniswap(self):
         print(self.uniswap().exchange_address_from_token(Web3.toChecksumAddress("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599")))

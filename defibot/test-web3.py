@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-import defibot
+import defibotlocal
 
-dfb = defibot.Defibot()
+dfb = defibotlocal.DefibotLocal()
 web3 = dfb.web3()
 print(web3.net.peer_count)
 print(web3.eth.chainId)

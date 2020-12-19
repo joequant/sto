@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-import defibot
+import defibotlocal
 
-dfb = defibot.Defibot()
+dfb = defibotlocal.DefibotLocal()
 dfb.test_pending()
 
