@@ -22,7 +22,6 @@ def main():
     try:
         loop.run_until_complete(
             asyncio.gather(
-                log_loop(block_filter, 2),
                 log_loop(tx_filter, 2)))
     finally:
         loop.close()
