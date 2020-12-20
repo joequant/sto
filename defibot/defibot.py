@@ -20,7 +20,9 @@ class Defibot:
         with open(os.path.join(script_dir, 'config.json')) as f:
             self._config = json5.load(f)
         self._uniswap = None
+        self._uniswap_write = None
         self._web3 = None
+        self._web3_write = None
         self._abi_cache = {}
         self.wait_async = 1
     def config(self, s):
@@ -33,6 +35,16 @@ class Defibot:
             elif "ws:" in provider or "wss:" in provider:
                 self._web3 = Web3(Web3.WebsocketProvider(provider))
         return self._web3
+    def web3_write(self):
+        if 'provider_write' not in self._config:
+            return self.web3()
+        if self._web3_write is None:
+            provider = self.config('provider_write')
+            if "http:" in provider or "https:" in provider:
+                self._web3_write = Web3(Web3.HTTPProvider(provider))
+            elif "ws:" in provider or "wss:" in provider:
+                self._web3_write = Web3(Web3.WebsocketProvider(provider))
+        return self._web3_write
     def uniswap(self):
         if self._uniswap is None:
             self._uniswap = Uniswap(self.config('address'),
@@ -40,6 +52,15 @@ class Defibot:
                                     web3=self.web3(),
                                     version=1)
         return self._uniswap
+    def uniswap_write(self):
+        if self._uniswap_write is None:
+            self._uniswap_write = Uniswap(self.config('address'),
+                                          self.config('private_key'),
+                                          web3=self.web3_write(),
+                                          version=1)
+        return self._uniswap_write
+    def uniswap_gql(self, query):
+        return {}
     def pending_txns(self):
         return None
     def process(self, pending_list):
