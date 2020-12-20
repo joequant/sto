@@ -51,12 +51,12 @@ class Defibot:
             txn = self.web3().eth.getTransaction(event.hex())
             if contract is None or (txn is not None and txn['to'] is not None \
                                     and txn['to'].lower() in contract):
-                self.process_txn(txn)
+                self.process_txn(event.hex(), txn)
         except web3.exceptions.TransactionNotFound:
             pass
         # and whatever
-    def process_txn(self, txn):
-        print(txn)
+    def process_txn(self, txid, txn):
+        print(txid, txn)
     def test_pending(self):
         web3 = self.web3()
         return web3.geth.txpool.content()
