@@ -113,3 +113,9 @@ class Defibot:
                     log_loop(self, contract, tx_filter, self.wait_async)))
         finally:
             loop.close()
+    def load(self, contracts):
+        w3 = self.web3()
+        for k,v in w3.geth.txpool.content()['pending'].items():
+            for k1, v1 in v.items():
+                if v1['to'] is not None and v1['to'].lower() in contracts:
+                    self.process_txn(v1['hash'], v1)
