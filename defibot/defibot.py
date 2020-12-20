@@ -5,15 +5,12 @@ from uniswap import Uniswap
 import requests
 from requests.exceptions import HTTPError
 import asyncio
+import time
 
-def handle_event(event):
-    print(event)
-    # and whatever
-
-async def log_loop(event_filter, poll_interval):
+async def log_loop(defibot, event_filter, poll_interval):
     while True:
         for event in event_filter.get_new_entries():
-            handle_event(event)
+            defibot.handle_event(event)
         await asyncio.sleep(poll_interval)
 
 class Defibot:
@@ -46,19 +43,22 @@ class Defibot:
         pending = self.pending_txns()
         trades = self.process(pending)
         self.trade(trades)
+    def handle_event(self, event):
+        print(event.hex())
+        # and whatever
+
     def test_pending(self):
         web3 = self.web3()
-        event_filter = \
-            web3.eth.filter({"address":
-                             Web3.toChecksumAddress(self.config('token')),
-                             "fromBlock": "pending",
-                             "toBlock": "pending"})
         web3_pending_filter = web3.eth.filter('latest')
-        transaction_hashes = web3.eth.getFilterChanges(web3_pending_filter.filter_id)
+        event_filter = \
+            web3.eth.filter({"fromBlock": "pending",
+                             "toBlock": "pending"})
+        transaction_hashes = event_filter.get_all_entries()
+        print(transaction_hashes)
         s = ""
         s += repr(web3.geth.txpool.status())
         s += repr(transaction_hashes)
-        s += repr(web3_pending_filter.get_new_entries())
+#        s += repr(web3_pending_filter.get_all_entries())
         return s
 #transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
     def test_uniswap(self):
@@ -78,6 +78,6 @@ class Defibot:
         try:
             loop.run_until_complete(
                 asyncio.gather(
-                    log_loop(tx_filter, 2)))
+                    log_loop(self, tx_filter, 2)))
         finally:
             loop.close()
