@@ -1,5 +1,6 @@
 import os
 import json5
+import web3
 from web3 import Web3
 from uniswap import Uniswap
 import requests
@@ -44,22 +45,15 @@ class Defibot:
         trades = self.process(pending)
         self.trade(trades)
     def handle_event(self, event):
-        print(event.hex())
+        try:
+            print(self.web3().eth.getTransaction(event.hex()))
+        except web3.exceptions.TransactionNotFound:
+            pass
         # and whatever
 
     def test_pending(self):
         web3 = self.web3()
-        web3_pending_filter = web3.eth.filter('latest')
-        event_filter = \
-            web3.eth.filter({"fromBlock": "pending",
-                             "toBlock": "pending"})
-        transaction_hashes = event_filter.get_all_entries()
-        print(transaction_hashes)
-        s = ""
-        s += repr(web3.geth.txpool.status())
-        s += repr(transaction_hashes)
-#        s += repr(web3_pending_filter.get_all_entries())
-        return s
+        return web3.geth.txpool.content()
 #transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
     def test_uniswap(self):
         s = ""
