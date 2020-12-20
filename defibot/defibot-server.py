@@ -5,7 +5,7 @@ from ariadne import graphql_sync, make_executable_schema, gql, load_schema_from_
 from ariadne.constants import PLAYGROUND_HTML
 from model import query
 
-type_defs = gql(load_schema_from_path("./schema.graphql"))
+type_defs = gql(load_schema_from_path("./defibot-server.gql"))
 schema = make_executable_schema(type_defs, query)
 
 app = Flask(__name__)
