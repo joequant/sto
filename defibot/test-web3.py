@@ -3,16 +3,15 @@ import defibotlocal
 
 dfb = defibotlocal.DefibotLocal()
 web3 = dfb.web3()
-print(web3.net.peer_count)
-print(web3.eth.chainId)
-print(web3.eth.blockNumber)
-print(web3.eth.accounts)
-print(web3.eth.syncing)
+# WBTC/ETH
+contract = "0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852"
 
-block = web3.eth.getBlock('latest')
-print(block['number'])
-print(web3.geth.txpool.inspect())
-print(dfb.gasnow())
-
+content = web3.geth.txpool.content()
+print("get content")
+for k, v in content['pending'].items():
+    for k1, v1 in v.items():
+        print(v1['to'], contract)
+        if v1['to'] == contract:
+            print(v1)
 
 

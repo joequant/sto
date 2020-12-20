@@ -8,10 +8,10 @@ from requests.exceptions import HTTPError
 import asyncio
 import time
 
-async def log_loop(defibot, event_filter, poll_interval):
+async def log_loop(defibot, contract, event_filter, poll_interval):
     while True:
         for event in event_filter.get_new_entries():
-            defibot.handle_event(event)
+            defibot.handle_event(event, contract)
         await asyncio.sleep(poll_interval)
 
 class Defibot:
@@ -44,9 +44,12 @@ class Defibot:
         pending = self.pending_txns()
         trades = self.process(pending)
         self.trade(trades)
-    def handle_event(self, event):
+    def handle_event(self, event, contract):
         try:
-            print(self.web3().eth.getTransaction(event.hex()))
+            txn = self.web3().eth.getTransaction(event.hex())
+            if contract is None or (txn is not None and txn['to'] is not None \
+                                    and txn['to'].lower() in contract):
+                print(txn)
         except web3.exceptions.TransactionNotFound:
             pass
         # and whatever
@@ -64,7 +67,7 @@ class Defibot:
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
         response.raise_for_status()
         return response.json()
-    def test_eventloop(self):
+    def test_eventloop(self, contract=None):
         w3 = self.web3()
         block_filter = w3.eth.filter('latest')
         tx_filter = w3.eth.filter('pending')
@@ -72,6 +75,6 @@ class Defibot:
         try:
             loop.run_until_complete(
                 asyncio.gather(
-                    log_loop(self, tx_filter, 2)))
+                    log_loop(self, contract, tx_filter, 2)))
         finally:
             loop.close()
