@@ -21,6 +21,7 @@ class Defibot:
             self._config = json5.load(f)
         self._uniswap = None
         self._web3 = None
+        self.wait_async = 1
     def config(self, s):
         return self._config[s]
     def web3(self):
@@ -49,11 +50,12 @@ class Defibot:
             txn = self.web3().eth.getTransaction(event.hex())
             if contract is None or (txn is not None and txn['to'] is not None \
                                     and txn['to'].lower() in contract):
-                print(txn)
+                self.process_txn(txn)
         except web3.exceptions.TransactionNotFound:
             pass
         # and whatever
-
+    def process_txn(self, txn):
+        print(txn)
     def test_pending(self):
         web3 = self.web3()
         return web3.geth.txpool.content()
@@ -75,6 +77,6 @@ class Defibot:
         try:
             loop.run_until_complete(
                 asyncio.gather(
-                    log_loop(self, contract, tx_filter, 2)))
+                    log_loop(self, contract, tx_filter, self.wait_async)))
         finally:
             loop.close()
