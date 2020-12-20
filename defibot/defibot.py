@@ -102,7 +102,7 @@ class Defibot:
             response.raise_for_status()
             self._abi_cache[contract] = response.json()['result']
         return self._abi_cache[contract]
-    def test_eventloop(self, contract=None):
+    def run_eventloop(self, contract=None):
         w3 = self.web3()
         block_filter = w3.eth.filter('latest')
         tx_filter = w3.eth.filter('pending')
@@ -119,3 +119,5 @@ class Defibot:
             for k1, v1 in v.items():
                 if v1['to'] is not None and v1['to'].lower() in contracts:
                     self.process_txn(v1['hash'], v1)
+    def data(self):
+        return []
