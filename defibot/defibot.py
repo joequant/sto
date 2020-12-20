@@ -27,7 +27,11 @@ class Defibot:
         return self._config[s]
     def web3(self):
         if self._web3 is None:
-            self._web3 = Web3(Web3.HTTPProvider(self.config('provider')))
+            provider = self.config('provider')
+            if "http:" in provider or "https:" in provider:
+                self._web3 = Web3(Web3.HTTPProvider(provider))
+            elif "ws:" in provider or "wss:" in provider:
+                self._web3 = Web3(Web3.WebsocketProvider(provider))
         return self._web3
     def uniswap(self):
         if self._uniswap is None:
