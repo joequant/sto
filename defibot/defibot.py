@@ -21,6 +21,7 @@ class Defibot:
             self._config = json5.load(f)
         self._uniswap = None
         self._web3 = None
+        self._abi_cache = {}
         self.wait_async = 1
     def config(self, s):
         return self._config[s]
@@ -69,6 +70,13 @@ class Defibot:
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
         response.raise_for_status()
         return response.json()
+    def get_abi(self, contract):
+        if contract not in self._abi_cache:
+            response = \
+                requests.get("https://api.etherscan.io/api?module=contract&action=getabi&address={}".format(contract))
+            response.raise_for_status()
+            self._abi_cache[contract] = response.json()['result']
+        return self._abi_cache[contract]
     def test_eventloop(self, contract=None):
         w3 = self.web3()
         block_filter = w3.eth.filter('latest')
