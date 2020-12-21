@@ -137,12 +137,13 @@ query tokens {
     symbol
     name
     decimals
+    tradeVolumeUSD
+    totalLiquidity
   }
 }
 """ % token.lower()
-        retval = self.query("uniswap/uniswap-v2", query)['data']['tokens'][0]
-        print("query", token, retval)
-        return retval
+        retval = self.query("uniswap/uniswap-v2", query)['data']['tokens']
+        return None if len(retval) == 0 else retval[0]
     def token_info(self, token):
         return self.token_info_lowered(token)
     @lru_cache()
@@ -157,7 +158,8 @@ query tokens {
   }
 }
 """ % (token0.lower(), token1.lower())
-        return self.query("uniswap/uniswap-v2", query)['data']['pairs'][0]
+        retval = self.query("uniswap/uniswap-v2", query)['data']['pairs']
+        return None if len(retval) == 0 else retval[0]
     def pair_info(self, token0, token1):
         return self.pair_info_lowered(token0, token1)
     def trade(self, trade):

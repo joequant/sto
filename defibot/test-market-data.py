@@ -28,7 +28,7 @@ query swaps{
 """))
 
 print(dfbl.query("uniswap/uniswap-v2", """
-query tokens {
+{
   tokens(where:{id:"0x6b175474e89094c44da98b954eedeac495271d0f"}) {
     id
     symbol
