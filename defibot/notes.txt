@@ -8,3 +8,6 @@ https://hackernoon.com/mastering-the-mempool-a-how-to-guide-zs7u32ou
 wbtc-eth: 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599
 
 https://blog.sethcorker.com/how-to-create-a-react-flask-graphql-project
+
+Rostpen faucet
+wget https://faucet.ropsten.be/donate/<your ethereum address>

@@ -2,7 +2,7 @@
 from defibotlocal import DefibotLocal
 
 dfbl = DefibotLocal()
-print(dfbl.query("https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", """
+print(dfbl.query("uniswap/uniswap-v2", """
 query swaps{
   swaps(where:{transaction:"0x5ed0ee8ff25e0a368519ba10822d2f1d4261ca8cf3fe42b4f5806a515865d88f"}) {
     id
@@ -27,3 +27,14 @@ query swaps{
 }
 """))
 
+print(dfbl.query("uniswap/uniswap-v2", """
+query tokens {
+  tokens(where:{id:"0x6b175474e89094c44da98b954eedeac495271d0f"}) {
+    id
+    symbol
+    name
+    decimals
+  }
+}
+"""))
+print(dfbl.token_info("0x6B175474E89094C44Da98b954EedeAC495271d0F".lower()))

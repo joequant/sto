@@ -7,6 +7,7 @@ import requests
 from requests.exceptions import HTTPError
 import asyncio
 import time
+from functools import lru_cache
 
 async def log_loop(defibot, contract, event_filter, poll_interval):
     while True:
@@ -122,8 +123,25 @@ class Defibot:
     def data(self):
         return []
     def query(self, endpoint, query):
-        request = requests.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2', json={'query': query})
+        request = requests.post('https://api.thegraph.com/subgraphs/name/{}'.format(endpoint), json={'query': query})
         if request.status_code == 200:
             return request.json()
         else:
             raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, query))
+    @lru_cache()
+    def token_info_lowered(self, token):
+        query = """
+query tokens {
+  tokens(where:{id:"%s"}) {
+    id
+    symbol
+    name
+    decimals
+  }
+}
+""" % token.lower()
+        retval = self.query("uniswap/uniswap-v2", query)['data']['tokens'][0]
+        print("query", token, retval)
+        return retval
+    def token_info(self, token):
+        return self.token_info_lowered(token)
