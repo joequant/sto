@@ -50,14 +50,14 @@ class Defibot:
             self._uniswap = Uniswap(self.config('address'),
                                     self.config('private_key'),
                                     web3=self.web3(),
-                                    version=1)
+                                    version=2)
         return self._uniswap
     def uniswap_write(self):
         if self._uniswap_write is None:
             self._uniswap_write = Uniswap(self.config('address'),
                                           self.config('private_key'),
                                           web3=self.web3_write(),
-                                          version=1)
+                                          version=2)
         return self._uniswap_write
     def uniswap_gql(self, query):
         return {}
@@ -88,7 +88,6 @@ class Defibot:
 #transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
     def test_uniswap(self):
         s = ""
-        s += self.uniswap().exchange_address_from_token(Web3.toChecksumAddress("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599")) + "\n"
         s += repr(self.uniswap().get_fee_maker()) + "\n"
         return s
     def gasnow(self):
@@ -121,3 +120,9 @@ class Defibot:
                     self.process_txn(v1['hash'], v1)
     def data(self):
         return []
+    def query(self, endpoint, query):
+        request = requests.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2', json={'query': query})
+        if request.status_code == 200:
+            return request.json()
+        else:
+            raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, query))
