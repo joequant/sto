@@ -38,3 +38,5 @@ query tokens {
 }
 """))
 print(dfbl.token_info("0x6B175474E89094C44Da98b954EedeAC495271d0F".lower()))
+print(dfbl.pair_info("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                     "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"))

@@ -145,3 +145,20 @@ query tokens {
         return retval
     def token_info(self, token):
         return self.token_info_lowered(token)
+    @lru_cache()
+    def pair_info_lowered(self, token0, token1):
+        query = """
+{
+  pairs(where: {token0: "%s" ,
+  token1: "%s" }) {
+    id
+    reserve0
+    reserve1
+  }
+}
+""" % (token0.lower(), token1.lower())
+        return self.query("uniswap/uniswap-v2", query)['data']['pairs'][0]
+    def pair_info(self, token0, token1):
+        return self.pair_info_lowered(token0, token1)
+    def trade(self, trade):
+        return {}
