@@ -2,7 +2,7 @@ import os
 import json5
 import web3
 from web3 import Web3
-from uniswap import Uniswap
+from uniswap.uniswap import UniswapV2Client
 import requests
 from requests.exceptions import HTTPError
 import asyncio
@@ -47,17 +47,17 @@ class Defibot:
         return self._web3_write
     def uniswap(self):
         if self._uniswap is None:
-            self._uniswap = Uniswap(self.config('address'),
-                                    self.config('private_key'),
-                                    web3=self.web3(),
-                                    version=2)
+            self._uniswap = UniswapV2Client(self.config('address'),
+                                            self.config('private_key'),
+                                            provider=self.config('provider'))
         return self._uniswap
     def uniswap_write(self):
-        if self._uniswap_write is None:
-            self._uniswap_write = Uniswap(self.config('address'),
-                                          self.config('private_key'),
-                                          web3=self.web3_write(),
-                                          version=2)
+        if 'provider_write' not in self._config:
+            return self.uniswap()
+        elif self._uniswap_write is None:
+            self._uniswap_write = UniswapV2Client(self.config('address'),
+                                                  self.config('private_key'),
+                                                  provider=self.config('provider_write'))
         return self._uniswap_write
     def uniswap_gql(self, query):
         return {}
@@ -87,9 +87,10 @@ class Defibot:
         return web3.geth.txpool.content()
 #transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
     def test_uniswap(self):
-        s = ""
-        s += repr(self.uniswap().get_fee_maker()) + "\n"
-        return s
+        return {
+            "fee": self.uniswap().get_fee(),
+            "weth" : self.uniswap().get_weth_address()
+            }
     def gasnow(self):
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
         response.raise_for_status()
