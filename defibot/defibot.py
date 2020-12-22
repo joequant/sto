@@ -8,6 +8,7 @@ from requests.exceptions import HTTPError
 import asyncio
 import time
 from functools import lru_cache
+from dictcache import DictCache
 
 async def txn_loop(defibot, contract, event_filter, poll_interval):
     while True:
@@ -32,6 +33,8 @@ class Defibot:
         self._web3_write = None
         self._abi_cache = {}
         self.wait_async = 1
+        self.token_cache = DictCache("token")
+        self.pair_cache = DictCache("pair")
     def config(self, s):
         return self._config[s]
     def web3(self):
@@ -137,9 +140,9 @@ class Defibot:
             return request.json()
         else:
             raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, query))
-    @lru_cache()
     def token_info_lowered(self, token):
-        query = """
+        if token not in self.token_cache:
+            query = """
 query tokens {
   tokens(where:{id:"%s"}) {
     id
@@ -151,13 +154,14 @@ query tokens {
   }
 }
 """ % token.lower()
-        retval = self.query("uniswap/uniswap-v2", query)['data']['tokens']
-        return None if len(retval) == 0 else retval[0]
+            retval = self.query("uniswap/uniswap-v2", query)['data']['tokens']
+            self.token_cache[token] = None if len(retval) == 0 else retval[0]
+        return self.token_cache[token]
     def token_info(self, token):
         return self.token_info_lowered(token)
-    @lru_cache()
     def pair_info_lowered(self, token0, token1):
-        query = """
+        if token0 + token1 not in self.pair_cache:
+            query = """
 {
   pairs(where: {token0: "%s" ,
   token1: "%s" }) {
@@ -167,8 +171,10 @@ query tokens {
   }
 }
 """ % (token0.lower(), token1.lower())
-        retval = self.query("uniswap/uniswap-v2", query)['data']['pairs']
-        return None if len(retval) == 0 else retval[0]
+            retval = \
+                self.query("uniswap/uniswap-v2", query)['data']['pairs']
+            self.pair_cache[token0 + token1] = None if len(retval) == 0 else retval[0]
+        return self.pair_cache[token0 + token1]
     def pair_info(self, token0, token1):
         return self.pair_info_lowered(token0, token1)
     def trade(self, trade):
