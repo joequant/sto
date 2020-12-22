@@ -9,10 +9,16 @@ import asyncio
 import time
 from functools import lru_cache
 
-async def log_loop(defibot, contract, event_filter, poll_interval):
+async def txn_loop(defibot, contract, event_filter, poll_interval):
     while True:
         for event in event_filter.get_new_entries():
-            defibot.handle_event(event, contract)
+            defibot.handle_txn(event, contract)
+        await asyncio.sleep(poll_interval)
+
+async def block_loop(defibot, event_filter, poll_interval):
+    while True:
+        for event in event_filter.get_new_entries():
+            defibot.handle_block(event)
         await asyncio.sleep(poll_interval)
 
 class Defibot:
@@ -72,7 +78,7 @@ class Defibot:
         pending = self.pending_txns()
         trades = self.process(pending)
         self.trade(trades)
-    def handle_event(self, event, contract):
+    def handle_txn(self, event, contract):
         try:
             txn = self.web3().eth.getTransaction(event.hex())
             if contract is None or (txn is not None and txn['to'] is not None \
@@ -81,6 +87,8 @@ class Defibot:
         except web3.exceptions.TransactionNotFound:
             pass
         # and whatever
+    def handle_block(self, event):
+        print("block - ", event.hex());
     def process_txn(self, txid, txn):
         print(txid, txn)
     def test_pending(self):
@@ -111,7 +119,8 @@ class Defibot:
         try:
             loop.run_until_complete(
                 asyncio.gather(
-                    log_loop(self, contract, tx_filter, self.wait_async)))
+                    block_loop(self, block_filter, self.wait_async),
+                    txn_loop(self, contract, tx_filter, self.wait_async)))
         finally:
             loop.close()
     def load(self, contracts):
