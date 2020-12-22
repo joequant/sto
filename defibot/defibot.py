@@ -36,6 +36,7 @@ class Defibot:
         self.wait_async = 1
         self.token_cache = DictCache("token" + suffix)
         self.pair_cache = DictCache("pair" + suffix)
+        self.deadline = 600.0
     def config(self, s):
         return self._config[s]
     def web3(self):
@@ -162,29 +163,105 @@ query tokens {
         return self.token_info_lowered(token)
     def pair_info_lowered(self, token0, token1):
         if token0 + token1 not in self.pair_cache:
-            query = """
-{
-  pairs(where: {token0: "%s" ,
-  token1: "%s" }) {
-    id
-    reserve0
-    reserve1
-  }
-}
-""" % (token0.lower(), token1.lower())
-            try:
-                retval = \
-                    self.query("uniswap/uniswap-v2", query)
-                retval = retval['data']['pairs']
-            except e:
-                print("error", retval)
-                raise e
-            self.pair_cache[token0 + token1] = None if len(retval) == 0 else retval[0]
+            self.pair_cache[token0 + token1] = self.uniswap().get_pair(token0, token1)
         return self.pair_cache[token0 + token1]
     def pair_info(self, token0, token1):
         return self.pair_info_lowered(token0, token1)
-    def trade(self, trade):
-        return {}
     def utcnow(self):
         return datetime.datetime.utcnow().timestamp()
-
+    def trade(self, d):
+        u = self.uniswap_write()
+        action = d['action']
+        to = d['to'] if 'to' in d else self.config('address')
+        deadline = d['deadline'] if 'deadline' in d \
+            else int(self.utcnow() + self.deadline)
+        if action == "add_liquidity":
+            return u.add_liquidity(d['token0'],
+                                   d['token1'],
+                                   d['amount0'],
+                                   d['amount1'],
+                                   d['min0'],
+                                   d['min1'],
+                                   to,
+                                   deadline)
+        elif action == "add_liquidity_eth":
+            return u.add_liquidity_eth(d['token0'],
+                                       d['amount0'],
+                                       d['amount1'],
+                                       d['min0'],
+                                       d['min1'],
+                                       to,
+                                       deadline)
+        elif action == "remove_liquidity":
+            return u.remove_liquidity(d['token0'],
+                                      d['token1'],
+                                      d['liquidity'],
+                                      d['min0'],
+                                      d['min1'],
+                                      to,
+                                      deadline)
+        elif action == "remove_liquidity_eth":
+            return u.remove_liquidity_eth(d['token0'],
+                                          d['liquidity'],
+                                          d['min0'],
+                                          to,
+                                          deadline)
+        elif action == "remove_liquidity_with_permit":
+            return u.remove_liquidity_with_permit(d['token0'],
+                                                  d['token1'],
+                                                  d['liquidity'],
+                                                  d['min0'],
+                                                  d['min1'],
+                                                  to,
+                                                  deadline,
+                                                  d['approve_max'],
+                                                  d['v'],
+                                                  d['r'],
+                                                  d['s'])
+        elif action == "remove_liquidity_eth_with_permit":
+            return u.remove_liquidity_eth_with_permit(d['token0'],
+                                                      d['liquidity'],
+                                                      d['min0'],
+                                                      d['min1'],
+                                                      to,
+                                                      deadline,
+                                                      d['approve_max'],
+                                                      d['v'],
+                                                      d['r'],
+                                                      d['s'])
+        elif action == "swap_exact_tokens_for_tokens":
+            return u.swap_exact_tokens_for_tokens(d['amount'],
+                                                  d['min_out'],
+                                                  d['path'],
+                                                  to,
+                                                  deadline)
+        elif action == "swap_tokens_for_exact_tokens":
+            return u.swap_exact_tokens_for_tokens(d['amount'],
+                                                  d['amount_in_max'],
+                                                  d['path'],
+                                                  to,
+                                                  deadline)
+        elif action == "swap_exact_eth_for_tokens":
+            return u.swap_exact_eth_for_tokens(d['amount'],
+                                               d['min_out'],
+                                               d['path'],
+                                               to,
+                                               deadline)
+        elif action == "swap_tokens_for_exact_eth":
+            return u.swap_exact_tokens_for_tokens(d['amount_out'],
+                                                  d['amount_in_max'],
+                                                  d['path'],
+                                                  to,
+                                                  deadline)        
+        elif action == "swap_exact_tokens_for_eth":
+            return u.swap_exact_eth_for_tokens(d['amount'],
+                                               d['min_out'],
+                                               d['path'],
+                                               to,
+                                               deadline)
+        elif action == "swap_eth_for_exact_tokens":
+            return u.swap_eth_for_exact_tokens(d['amount_out'],
+                                               d['amount_in_max'],
+                                               d['path'],
+                                               to,
+                                               deadline)
