@@ -18,15 +18,15 @@ class DictCache:
         else:
             return self.s[key]
     def __setitem__(self, key, value):
-        self.s['_timestamp'][key] = self.now()
+        self.s['_timestamp'][key] = self.utcnow()
         self.s[key] = value
     def __contains__(self, k):
         return False if k not in self.s else \
             not self.expired(k)
     def __del__(self):
         self.s.close()
-    def now(self):
-        return datetime.datetime.now().timestamp()
+    def utcnow(self):
+        return datetime.datetime.utcnow().timestamp()
     def expired(self, k):
         return k in self.s['_timestamp'] and \
-            self.now() >= self.s['_timestamp'][k] + self.expires
+            self.utcnow() >= self.s['_timestamp'][k] + self.expires

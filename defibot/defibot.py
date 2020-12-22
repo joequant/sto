@@ -9,6 +9,7 @@ import asyncio
 import time
 from functools import lru_cache
 from dictcache import DictCache
+import datetime
 
 async def txn_loop(defibot, contract, event_filter, poll_interval):
     while True:
@@ -23,7 +24,7 @@ async def block_loop(defibot, event_filter, poll_interval):
         await asyncio.sleep(poll_interval)
 
 class Defibot:
-    def __init__(self):
+    def __init__(self, suffix=""):
         script_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(script_dir, 'config.json')) as f:
             self._config = json5.load(f)
@@ -33,8 +34,8 @@ class Defibot:
         self._web3_write = None
         self._abi_cache = {}
         self.wait_async = 1
-        self.token_cache = DictCache("token")
-        self.pair_cache = DictCache("pair")
+        self.token_cache = DictCache("token" + suffix)
+        self.pair_cache = DictCache("pair" + suffix)
     def config(self, s):
         return self._config[s]
     def web3(self):
@@ -171,11 +172,19 @@ query tokens {
   }
 }
 """ % (token0.lower(), token1.lower())
-            retval = \
-                self.query("uniswap/uniswap-v2", query)['data']['pairs']
+            try:
+                retval = \
+                    self.query("uniswap/uniswap-v2", query)
+                retval = retval['data']['pairs']
+            except e:
+                print("error", retval)
+                raise e
             self.pair_cache[token0 + token1] = None if len(retval) == 0 else retval[0]
         return self.pair_cache[token0 + token1]
     def pair_info(self, token0, token1):
         return self.pair_info_lowered(token0, token1)
     def trade(self, trade):
         return {}
+    def utcnow(self):
+        return datetime.datetime.utcnow().timestamp()
+
