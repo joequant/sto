@@ -190,6 +190,7 @@ query tokens {
             return u.add_liquidity_eth(
                 d['token'],
                 d['amountTokenDesired'],
+                d['amountETH'],
                 d['amountTokenMin'],
                 d['amountETHMin'],
                 to,
