@@ -167,14 +167,14 @@ query tokens {
         return self.pair_cache[token0 + token1]
     def pair_info(self, token0, token1):
         return self.pair_info_lowered(token0, token1)
-    def utcnow(self):
-        return datetime.datetime.utcnow().timestamp()
+    def now(self):
+        return datetime.datetime.now().timestamp()
     def trade(self, d):
         u = self.uniswap_write()
         action = d['action']
         to = d['to'] if 'to' in d else self.config('address')
         deadline = d['deadline'] if 'deadline' in d \
-            else int(self.utcnow() + self.deadline)
+            else int(self.now() + self.deadline)
         print(deadline)
         if action == "addLiquidity":
             return u.add_liquidity(

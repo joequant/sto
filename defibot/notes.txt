@@ -11,3 +11,7 @@ https://blog.sethcorker.com/how-to-create-a-react-flask-graphql-project
 
 Rostpen faucet
 wget https://faucet.ropsten.be/donate/<your ethereum address>
+
+Kovan DAI
+https://www.reddit.com/r/MakerDAO/comments/f2msfr/question_how_to_get_some_kovan_dai_from_oasis/
+https://testnet.aave.com/faucet
