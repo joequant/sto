@@ -175,6 +175,7 @@ query tokens {
         to = d['to'] if 'to' in d else self.config('address')
         deadline = d['deadline'] if 'deadline' in d \
             else int(self.utcnow() + self.deadline)
+        print(deadline)
         if action == "addLiquidity":
             return u.add_liquidity(
                 d['tokenA'],
