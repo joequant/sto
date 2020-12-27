@@ -25,8 +25,9 @@ async def block_loop(defibot, event_filter, poll_interval):
         await asyncio.sleep(poll_interval)
 
 class Defibot:
-    def __init__(self, suffix=""):
+    def __init__(self, name=None):
         script_dir = os.path.dirname(os.path.realpath(__file__))
+        self.name = type(self).__name__ if name is None else name
         with open(os.path.join(script_dir, 'config.json')) as f:
             self._config = json5.load(f)
         self._uniswap = None
@@ -35,8 +36,8 @@ class Defibot:
         self._web3_write = None
         self._abi_cache = {}
         self.wait_async = 1
-        self.token_cache = DictCache("token" + suffix)
-        self.pair_cache = DictCache("pair" + suffix)
+        self.token_cache = DictCache("token-" + self.name)
+        self.pair_cache = DictCache("pair-" + self.name)
         self.deadline = 600.0
         self.default_gas_price = 15
     def config(self, s):
