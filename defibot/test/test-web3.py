@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 import defibotlocal
 
 dfb = defibotlocal.DefibotLocal(name="test-web3")
@@ -8,11 +11,12 @@ w3 = dfb.web3()
 dai = w3.toChecksumAddress("0x6b175474e89094c44da98b954eedeac495271d0f")
 weth = w3.toChecksumAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")
 u = dfb.uniswap()
-pair = u.get_pair(weth, dai)
-print(pair)
-print(u.get_k_last(pair))
-print(u.get_amounts_in(1, [weth, dai]))
-print(u.get_amounts_out(1000000000, [dai, weth]))
+def test_pair():
+    pair = u.get_pair(weth, dai)
+    assert (pair == "0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11")
+#    print(u.get_k_last(pair))
+    assert(u.get_amounts_in(1, [weth, dai]) == [1, 1])
+    assert(len(u.get_amounts_out(1000000000, [dai, weth])) == 2)
 
 """
 {'amountIn': 3750000000000000000,
@@ -45,14 +49,16 @@ print(u.get_amounts_out(1000000000, [dai, weth]))
  'txid': '0xb26959559d83253824ea699c40ec36094b3258dd885cfe0de0f9104bb4081fa5'}
 """
 
-print(u.get_reserves(
-    '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F'
-))
-print(u.get_amounts_out(
-    3750000000000000000,
-    ['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-          '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-          '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          '0xc944E90C64B2c07662A292be6244BDf05Cda44a7']))
+def test_reserves():
+    assert(len(u.get_reserves(
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+    )) == 3)
+    assert(len(u.get_amounts_out(
+        3750000000000000000,
+        ['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+         '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+         '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+         '0xc944E90C64B2c07662A292be6244BDf05Cda44a7'])) == 4)
+
 
