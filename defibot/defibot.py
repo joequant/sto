@@ -20,7 +20,7 @@ async def txn_loop(defibot, contract, event_filter, poll_interval):
 async def block_loop(defibot, event_filter, poll_interval):
     while True:
         for event in event_filter.get_new_entries():
-            block = defibot.web3().eth.getBlock('latest')
+            block = defibot.web3().eth.getBlock(event)
             defibot.handle_block(block)
         await asyncio.sleep(poll_interval)
 
@@ -39,7 +39,8 @@ class Defibot:
         self.token_cache = DictCache("token-" + self.name)
         self.pair_cache = DictCache("pair-" + self.name)
         self.deadline = 600.0
-        self.default_gas_price = 15
+        self.default_gas_price = \
+            self.web3().toWei(15, "gwei")
     def config(self, s):
         return self._config[s]
     def web3(self):
@@ -172,6 +173,20 @@ query tokens {
         return self.pair_info_lowered(token0, token1)
     def now(self):
         return datetime.datetime.now().timestamp()
+    def gasUse(self, d):
+        if not isinstance(d, dict):\
+           return None
+        if 'func' not in d:
+            return None
+        func = d['func']
+        if func in [
+                'swapExactTokensForETH',
+                'swapTokensForExactETH',
+                'swapETHForExactTokens',
+                'swapExactETHForTokens',
+                'swapTokensForExactTokens',
+                'swapExactTokensForTokens']:
+            return 120000
     def trade(self, d):
         u = self.uniswap_write()
         action = d['action']
