@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 import json5
 import web3
@@ -87,18 +88,18 @@ class Defibot:
         pending = self.pending_txns()
         trades = self.process(pending)
         self.trade(trades)
-    def handle_txn(self, event, contract):
+    def handle_txn(self, event, contract, block_identifier='latest'):
         try:
             txn = self.web3().eth.getTransaction(event.hex())
             if contract is None or (txn is not None and txn['to'] is not None \
                                     and txn['to'].lower() in contract):
-                self.process_txn(event.hex(), txn)
+                self.process_txn(event.hex(), txn, block_identifier)
         except web3.exceptions.TransactionNotFound:
             pass
         # and whatever
     def handle_block(self, event):
-        print("block - ", event.hex());
-    def process_txn(self, txid, txn):
+        print("block - ", event);
+    def process_txn(self, txid, txn, block_identifier='latest'):
         print(txid, txn)
     def test_pending(self):
         web3 = self.web3()
@@ -187,6 +188,17 @@ query tokens {
                 'swapTokensForExactTokens',
                 'swapExactTokensForTokens']:
             return 120000
+    def backtest(self, contract=None, block_start='latest',
+                 block_finish='latest'):
+        if block_start == 'latest':
+            block_start = self.web3().eth.blockNumber
+        if block_finish == 'latest':
+            block_finish = self.web3().eth.blockNumber
+        for i in range(block_start, block_finish+1):
+            block = self.web3().eth.getBlock(i)
+            for t in block['transactions']:
+                self.handle_txn(t, contract, i-1)
+            self.handle_block(block)
     def trade(self, d):
         u = self.uniswap_write()
         action = d['action']
@@ -312,3 +324,7 @@ query tokens {
             )
         else:
             raise InvalidValue
+
+if __name__ == '__main__':
+    dfb = Defibot()
+    dfb.run_eventloop(["0x7a250d5630b4cf539739df2c5dacb4c659f2488d"])
