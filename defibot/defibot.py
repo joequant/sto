@@ -64,9 +64,13 @@ class Defibot:
         return self._web3_write
     def uniswap(self):
         if self._uniswap is None:
+            if 'provider_archive' in self._config:
+                provider = self.config('provider_archive')
+            else:
+                provider = self.config('provider')
             self._uniswap = UniswapV2Client(self.config('address'),
                                             self.config('private_key'),
-                                            provider=self.config('provider'))
+                                            provider=provider)
         return self._uniswap
     def uniswap_write(self):
         if 'provider_write' not in self._config:

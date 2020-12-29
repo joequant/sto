@@ -43,5 +43,5 @@ services:
       - ./data/ethereum:/root/.ethereum
     command: >
       --http  --http.api web3,eth,personal,miner,net,txpool
-      --http.addr "127.0.0.1" --graphql --cache=2048
+      --http.addr "127.0.0.1" --graphql --cache=2048 --gcmode=archive
       --txpool.globalqueue=1000000
