@@ -154,8 +154,7 @@ class Defibot:
     def token_info_lowered(self, token):
         if token not in self.token_cache:
             query = """
-query tokens {
-  tokens(where:{id:"%s"}) {
+  token(id:"%s") {
     id
     symbol
     name
@@ -163,13 +162,12 @@ query tokens {
     tradeVolumeUSD
     totalLiquidity
   }
-}
 """ % token.lower()
-            retval = self.query("uniswap/uniswap-v2", query)['data']['tokens']
+            retval = self.query("uniswap/uniswap-v2", query)['data']['token']
             self.token_cache[token] = None if len(retval) == 0 else retval[0]
         return self.token_cache[token]
     def token_info(self, token):
-        return self.token_info_lowered(token)
+        return self.token_info_lowered(token.lower())
     def pair_info_lowered(self, token0, token1):
         if token0 + token1 not in self.pair_cache:
             self.pair_cache[token0 + token1] = self.uniswap().get_pair(token0, token1)
@@ -203,6 +201,17 @@ query tokens {
             for t in block['transactions']:
                 self.handle_txn(t, contract, i-1)
             self.handle_block(block)
+    def eth_price(self, block_identifier="latest"):
+        u = self.uniswap()
+        weth = u.get_weth_address()
+        usdt = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+        weth_decimals = int(self.token_info(weth)['decimals'])
+        print(self.token_info(usdt))
+        usdt_decimals = int(self.token_info(usdt)['decimals'])
+        reserve = u.get_reserves(u.get_weth_address(),
+                                 usdt,
+                                 block_identifier)
+        return reserve[1]/reserve[0]*pow(10,weth_decimals-usdt_decimals)
     def trade(self, d):
         u = self.uniswap_write()
         action = d['action']
