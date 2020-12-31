@@ -52,11 +52,20 @@ class Defibot:
         self.wait_async = 1
         self.token_cache = DictCache("token-" + self.name)
         self.pair_cache = DictCache("pair-" + self.name)
+        self.reserves_cache = DictCache("reserves-" + self.name)
         self.deadline = 600.0
         self.default_gas_price = \
             self.web3().toWei(15, "gwei")
+        self._weth_address = None
     def config(self, s):
         return self._config[s]
+
+    def get_weth_address(self):
+        if self._weth_address is None:
+            self._weth_address = \
+                self.uniswap().get_weth_address()
+        return self._weth_address
+
     def web3(self):
         if self._web3 is None:
             provider = self.config('provider')
@@ -205,7 +214,7 @@ class Defibot:
                 self.handle_txn(t, i-1)
             self.handle_block(block)
     def get_balance(self, contract=None, block_identifier="latest"):
-        if contract == self.uniswap().get_weth_address() or \
+        if contract == self.get_weth_address() or \
            contract is None:
             return self.web3().eth.getBalance(
                 self.config('address'),
@@ -218,27 +227,44 @@ class Defibot:
             )
             return erc20_contract.functions.balanceOf(self.config('address')).call()
     def eth_price(self, block_identifier="latest"):
-        u = self.uniswap()
         usdt = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
         usdt_decimals = int(self.token_info(usdt)['decimals'])
-        reserve = u.get_reserves(u.get_weth_address(),
-                                 usdt,
-                                 block_identifier)
+        reserve = self.get_reserves(self.get_weth_address(),
+                                    usdt,
+                                    block_identifier)
         return normalize_decimal(
             reserve[1]/reserve[0],
             usdt_decimals - ETH_DECIMALS
         )
     def token_price(self, token, block_identifier="latest"):
-        u = self.uniswap()
+        if match_nocase(token, self.get_weth_address()):
+            return self.eth_price(block_identifier)
         token_decimals = int(self.token_info(token)['decimals'])
-        reserve = u.get_reserves(u.get_weth_address(),
-                                 token,
-                                 block_identifier)
+        reserve = self.get_reserves(self.get_weth_address(),
+                                    token,
+                                    block_identifier)
         token_to_eth = normalize_decimal(
             reserve[0]/reserve[1],
             ETH_DECIMALS - token_decimals
         )
         return token_to_eth * self.eth_price(block_identifier)
+
+    def get_reserves(self, token_a, token_b, block_identifier):
+        if block_identifier == "latest":
+            u = self.uniswap()
+            return u.get_reserves(token_a,
+                                  token_b,
+                                  block_identifier)
+        key = "%s%s%d" % (token_a.lower(),
+                          token_b.lower(), block_identifier)
+        if key not in self.reserves_cache:
+            u = self.uniswap()
+            self.reserves_cache[key] = \
+                u.get_reserves(token_a,
+                               token_b,
+                               block_identifier)
+        return self.reserves_cache[key]
+
     def trade(self, d):
         u = self.uniswap_write()
         action = d['action']
