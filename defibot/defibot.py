@@ -240,9 +240,12 @@ class Defibot:
         if match_nocase(token, self.get_weth_address()):
             return self.eth_price(block_identifier)
         token_decimals = int(self.token_info(token)['decimals'])
-        reserve = self.get_reserves(self.get_weth_address(),
-                                    token,
-                                    block_identifier)
+        try:
+            reserve = self.get_reserves(self.get_weth_address(),
+                                        token,
+                                        block_identifier)
+        except:
+            return None
         token_to_eth = normalize_decimal(
             reserve[0]/reserve[1],
             ETH_DECIMALS - token_decimals
