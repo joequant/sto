@@ -1,17 +1,15 @@
 #!/usr/bin/python3
 import os
-import json5
+import logging
+import asyncio
+import datetime
+import requests
+from uniswap.uniswap import UniswapV2Client
 import web3
 from web3 import Web3
-from uniswap.uniswap import UniswapV2Client
-import requests
-from requests.exceptions import HTTPError
-import asyncio
-import time
-from functools import lru_cache
+import json5
 from dictcache import DictCache
-import datetime
-import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 logger.addHandler(logging.StreamHandler())
@@ -90,23 +88,13 @@ class Defibot:
     def uniswap_write(self):
         if 'provider_write' not in self._config:
             return self.uniswap()
-        elif self._uniswap_write is None:
+        if self._uniswap_write is None:
             self._uniswap_write = UniswapV2Client(self.config('address'),
                                                   self.config('private_key'),
                                                   provider=self.config('provider_write'))
         return self._uniswap_write
-    def uniswap_gql(self, query):
-        return {}
     def pending_txns(self):
         return None
-    def process(self, pending_list):
-        return None
-    def trade(self, trade_list):
-        return None
-    def run_once(self):
-        pending = self.pending_txns()
-        trades = self.process(pending)
-        self.trade(trades)
     def handle_txn(self, event, block_identifier='latest'):
         try:
             txn = self.web3().eth.getTransaction(event.hex())
@@ -118,13 +106,9 @@ class Defibot:
             pass
         # and whatever
     def handle_block(self, event):
-        print("block - ", event);
+        print("block - ", event)
     def process_txn(self, txid, txn, block_identifier='latest'):
         print(txid, txn)
-    def test_pending(self):
-        web3 = self.web3()
-        return web3.geth.txpool.content()
-#transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
     def gasnow(self):
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
         response.raise_for_status()
@@ -156,12 +140,15 @@ class Defibot:
                     self.process_txn(v1['hash'], v1)
     def data(self):
         return []
+
     def query(self, endpoint, query):
-        request = requests.post('https://api.thegraph.com/subgraphs/name/{}'.format(endpoint), json={'query': query})
-        if request.status_code == 200:
-            return request.json()
-        else:
-            raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, query))
+        request = requests.post(
+            'https://api.thegraph.com/subgraphs/name/{}'.format(endpoint),
+            json={'query': query}
+        )
+        request.raise_for_status()
+        return request.json()
+
     def token_info_graphql(self, token):
         if token not in self.token_cache:
             query = """{
@@ -178,7 +165,7 @@ class Defibot:
             try:
                 retval = self.query("uniswap/uniswap-v2", query)
             except:
-                logger.error("invalid query" + query)
+                logger.error('invalid query %s', query)
             retval = retval['data']['token']
             self.token_cache[token] = retval
         return self.token_cache[token]
@@ -192,9 +179,9 @@ class Defibot:
         return self.pair_cache[key]
     def now(self):
         return datetime.datetime.now().timestamp()
-    def gasUse(self, d):
-        if not isinstance(d, dict):\
-           return None
+    def gas_use(self, d):
+        if not isinstance(d, dict):
+            return None
         if 'func' not in d:
             return None
         func = d['func']
@@ -215,7 +202,7 @@ class Defibot:
         for i in range(block_start, block_finish+1):
             block = self.web3().eth.getBlock(i)
             for t in block['transactions']:
-                logger.debug("txn - " + t.hex())
+                logger.debug("txn - %s", t.hex())
                 self.handle_txn(t, i-1)
             self.handle_block(block)
     def get_balance(self, contract=None, block_identifier="latest"):
@@ -233,7 +220,6 @@ class Defibot:
             return erc20_contract.functions.balanceOf(self.config('address')).call()
     def eth_price(self, block_identifier="latest"):
         u = self.uniswap()
-        weth = u.get_weth_address()
         usdt = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
         usdt_decimals = int(self.token_info(usdt)['decimals'])
         reserve = u.get_reserves(u.get_weth_address(),
@@ -245,7 +231,6 @@ class Defibot:
         )
     def token_price(self, token, block_identifier="latest"):
         u = self.uniswap()
-        weth = u.get_weth_address()
         token_decimals = int(self.token_info(token)['decimals'])
         reserve = u.get_reserves(u.get_weth_address(),
                                  token,
@@ -274,7 +259,7 @@ class Defibot:
                 to,
                 deadline
             )
-        elif action == "addLiquidityETH":
+        if action == "addLiquidityETH":
             return u.add_liquidity_eth(
                 d['token'],
                 d['amountTokenDesired'],
@@ -284,7 +269,7 @@ class Defibot:
                 to,
                 deadline
             )
-        elif action == "removeLiquidity":
+        if action == "removeLiquidity":
             return u.remove_liquidity(
                 d['tokenA'],
                 d['tokenB'],
@@ -294,7 +279,7 @@ class Defibot:
                 to,
                 deadline
             )
-        elif action == "removeLiquidityETH":
+        if action == "removeLiquidityETH":
             return u.remove_liquidity_eth(
                 d['token'],
                 d['liquidity'],
@@ -303,7 +288,7 @@ class Defibot:
                 to,
                 deadline
             )
-        elif action == "removeLiquidityWithPermit":
+        if action == "removeLiquidityWithPermit":
             return u.remove_liquidity_with_permit(
                 d['tokenA'],
                 d['tokenB'],
@@ -317,7 +302,7 @@ class Defibot:
                 d['r'],
                 d['s']
             )
-        elif action == "removeLiquidityETHWithPermit":
+        if action == "removeLiquidityETHWithPermit":
             return u.remove_liquidity_eth_with_permit(
                 d['token'],
                 d['liquidity'],
@@ -330,7 +315,7 @@ class Defibot:
                 d['r'],
                 d['s']
             )
-        elif action == "swapExactTokensForTokens":
+        if action == "swapExactTokensForTokens":
             return u.swap_exact_tokens_for_tokens(
                 d['amountIn'],
                 d['amountOutMin'],
@@ -338,7 +323,7 @@ class Defibot:
                 to,
                 deadline
             )
-        elif action == "swapTokensForExactTokens":
+        if action == "swapTokensForExactTokens":
             return u.swap_exact_tokens_for_tokens(
                 d['amountOut'],
                 d['amountInMax'],
@@ -346,7 +331,7 @@ class Defibot:
                 to,
                 deadline
             )
-        elif action == "swapExactETHForTokens":
+        if action == "swapExactETHForTokens":
             return u.swap_exact_eth_for_tokens(
                 d['amountIn'],
                 d['amountOutMin'],
@@ -354,15 +339,15 @@ class Defibot:
                 to,
                 deadline
             )
-        elif action == "swapTokensForExactETH":
+        if action == "swapTokensForExactETH":
             return u.swap_exact_tokens_for_tokens(
                 d['amountOut'],
                 d['amountInMax'],
                 d['path'],
                 to,
                 deadline
-            )        
-        elif action == "swapExactTokensForETH":
+            )
+        if action == "swapExactTokensForETH":
             return u.swap_exact_eth_for_tokens(
                 d['amountIn'],
                 d['amountOutMin'],
@@ -370,7 +355,7 @@ class Defibot:
                 to,
                 deadline
             )
-        elif action == "swapETHForExactTokens":
+        if action == "swapETHForExactTokens":
             return u.swap_eth_for_exact_tokens(
                 d['amountOut'],
                 d['amountInMax'],
@@ -378,8 +363,7 @@ class Defibot:
                 to,
                 deadline
             )
-        else:
-            raise InvalidValue
+        raise Exception("invalid action")
 
 if __name__ == '__main__':
     dfb = Defibot()
