@@ -11,11 +11,15 @@ import time
 from functools import lru_cache
 from dictcache import DictCache
 import datetime
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
+logger.addHandler(logging.StreamHandler())
 
-async def txn_loop(defibot, contract, event_filter, poll_interval):
+async def txn_loop(defibot, event_filter, poll_interval):
     while True:
         for event in event_filter.get_new_entries():
-            defibot.handle_txn(event, contract)
+            defibot.handle_txn(event)
         await asyncio.sleep(poll_interval)
 
 async def block_loop(defibot, event_filter, poll_interval):
@@ -25,13 +29,24 @@ async def block_loop(defibot, event_filter, poll_interval):
             defibot.handle_block(block)
         await asyncio.sleep(poll_interval)
 
+def match_nocase(a, b):
+    return a.lower() == b.lower()
+
+def normalize_decimal(a, b):
+    return a / pow(10, b)
+
+ETH_DECIMALS=18
+
 class Defibot:
-    def __init__(self, name=None):
+    def __init__(self,
+                 router=["0x7a250d5630b4cf539739df2c5dacb4c659f2488d"],
+                 name=None):
         script_dir = os.path.dirname(os.path.realpath(__file__))
         self.name = type(self).__name__ if name is None else name
         with open(os.path.join(script_dir, 'config.json')) as f:
             self._config = json5.load(f)
         self._uniswap = None
+        self.router = router
         self._uniswap_write = None
         self._web3 = None
         self._web3_write = None
@@ -92,11 +107,12 @@ class Defibot:
         pending = self.pending_txns()
         trades = self.process(pending)
         self.trade(trades)
-    def handle_txn(self, event, contract, block_identifier='latest'):
+    def handle_txn(self, event, block_identifier='latest'):
         try:
             txn = self.web3().eth.getTransaction(event.hex())
-            if contract is None or (txn is not None and txn['to'] is not None \
-                                    and txn['to'].lower() in contract):
+            if self.router is None or \
+               (txn is not None and txn['to'] is not None \
+                and txn['to'].lower() in self.router):
                 self.process_txn(event.hex(), txn, block_identifier)
         except web3.exceptions.TransactionNotFound:
             pass
@@ -109,11 +125,6 @@ class Defibot:
         web3 = self.web3()
         return web3.geth.txpool.content()
 #transactions = [web3.eth.getTransaction(h) for h in transaction_hashes]
-    def test_uniswap(self):
-        return {
-            "fee": self.uniswap().get_fee(),
-            "weth" : self.uniswap().get_weth_address()
-            }
     def gasnow(self):
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
         response.raise_for_status()
@@ -125,7 +136,7 @@ class Defibot:
             response.raise_for_status()
             self._abi_cache[contract] = response.json()['result']
         return self._abi_cache[contract]
-    def run_eventloop(self, contract=None):
+    def run_eventloop(self):
         w3 = self.web3()
         block_filter = w3.eth.filter('latest')
         tx_filter = w3.eth.filter('pending')
@@ -134,14 +145,14 @@ class Defibot:
             loop.run_until_complete(
                 asyncio.gather(
                     block_loop(self, block_filter, self.wait_async),
-                    txn_loop(self, contract, tx_filter, self.wait_async)))
+                    txn_loop(self, tx_filter, self.wait_async)))
         finally:
             loop.close()
-    def load(self, contracts):
+    def load(self):
         w3 = self.web3()
         for k,v in w3.geth.txpool.content()['pending'].items():
             for k1, v1 in v.items():
-                if v1['to'] is not None and v1['to'].lower() in contracts:
+                if v1['to'] is not None and v1['to'].lower() in self.router:
                     self.process_txn(v1['hash'], v1)
     def data(self):
         return []
@@ -151,9 +162,9 @@ class Defibot:
             return request.json()
         else:
             raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, query))
-    def token_info_lowered(self, token):
+    def token_info_graphql(self, token):
         if token not in self.token_cache:
-            query = """
+            query = """{
   token(id:"%s") {
     id
     symbol
@@ -162,18 +173,23 @@ class Defibot:
     tradeVolumeUSD
     totalLiquidity
   }
+}
 """ % token.lower()
-            retval = self.query("uniswap/uniswap-v2", query)['data']['token']
-            self.token_cache[token] = None if len(retval) == 0 else retval[0]
+            try:
+                retval = self.query("uniswap/uniswap-v2", query)
+            except:
+                logger.error("invalid query" + query)
+            retval = retval['data']['token']
+            self.token_cache[token] = retval
         return self.token_cache[token]
     def token_info(self, token):
-        return self.token_info_lowered(token.lower())
-    def pair_info_lowered(self, token0, token1):
-        if token0 + token1 not in self.pair_cache:
-            self.pair_cache[token0 + token1] = self.uniswap().get_pair(token0, token1)
-        return self.pair_cache[token0 + token1]
+        return self.token_info_graphql(token.lower())
     def pair_info(self, token0, token1):
-        return self.pair_info_lowered(token0, token1)
+        key = token0.lower() + token1.lower()
+        if key not in self.pair_cache:
+            self.pair_cache[key] = \
+                self.uniswap().get_pair(token0, token1)
+        return self.pair_cache[key]
     def now(self):
         return datetime.datetime.now().timestamp()
     def gasUse(self, d):
@@ -190,7 +206,7 @@ class Defibot:
                 'swapTokensForExactTokens',
                 'swapExactTokensForTokens']:
             return 120000
-    def backtest(self, contract=None, block_start='latest',
+    def backtest(self, block_start='latest',
                  block_finish='latest'):
         if block_start == 'latest':
             block_start = self.web3().eth.blockNumber
@@ -199,19 +215,46 @@ class Defibot:
         for i in range(block_start, block_finish+1):
             block = self.web3().eth.getBlock(i)
             for t in block['transactions']:
-                self.handle_txn(t, contract, i-1)
+                logger.debug("txn - " + t.hex())
+                self.handle_txn(t, i-1)
             self.handle_block(block)
+    def get_balance(self, contract=None, block_identifier="latest"):
+        if contract == self.uniswap().get_weth_address() or \
+           contract is None:
+            return self.web3().eth.getBalance(
+                self.config('address'),
+                block_identifier=block_identifier
+            )
+        else:
+            erc20_contract = self.web3().eth.contract(
+                address=self.web3().toChecksumAddress(contract),
+                abi=self.uniswap().ERC20_ABI
+            )
+            return erc20_contract.functions.balanceOf(self.config('address')).call()
     def eth_price(self, block_identifier="latest"):
         u = self.uniswap()
         weth = u.get_weth_address()
         usdt = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
-        weth_decimals = int(self.token_info(weth)['decimals'])
-        print(self.token_info(usdt))
         usdt_decimals = int(self.token_info(usdt)['decimals'])
         reserve = u.get_reserves(u.get_weth_address(),
                                  usdt,
                                  block_identifier)
-        return reserve[1]/reserve[0]*pow(10,weth_decimals-usdt_decimals)
+        return normalize_decimal(
+            reserve[1]/reserve[0],
+            usdt_decimals - ETH_DECIMALS
+        )
+    def token_price(self, token, block_identifier="latest"):
+        u = self.uniswap()
+        weth = u.get_weth_address()
+        token_decimals = int(self.token_info(token)['decimals'])
+        reserve = u.get_reserves(u.get_weth_address(),
+                                 token,
+                                 block_identifier)
+        token_to_eth = normalize_decimal(
+            reserve[0]/reserve[1],
+            ETH_DECIMALS - token_decimals
+        )
+        return token_to_eth * self.eth_price(block_identifier)
     def trade(self, d):
         u = self.uniswap_write()
         action = d['action']
