@@ -18,3 +18,6 @@ def test_prices():
     # current price of USDT should be close to 1
     assert((dfb.token_price('0xdAC17F958D2ee523a2206206994597C13D831ec7') - 1.0) < 0.01)
 
+def test_write():
+    dfb = defibot.Defibot()
+    u = dfb.uniswap_write()
