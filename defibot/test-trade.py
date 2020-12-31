@@ -8,26 +8,12 @@ w3 = dfbl.web3()
 dai = w3.toChecksumAddress("0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa")
 weth = w3.toChecksumAddress("0xc778417e063141139fce010982780140aa0cd5ab")
 uw = dfbl.uniswap_write()
-#pair = uw._create_pair(dai, weth).hex()
-#print(pair)
-print(uw.get_pair(dai, weth))
+a = dfbl.trade({'action': 'swapETHForExactTokens',
+ 'amountInMax': 50000000000000000,
+ 'amountOut': 84892002913747888,
+ 'gasPrice': 80000000000,
+ 'path': ['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+          '0xb753428af26E81097e7fD17f40c88aaA3E04902c']})
+print(a.hex())
 
-r = dfbl.trade({
-    "action": "addLiquidityETH",
-    "token": dai,
-    "amountTokenDesired": 10000000,
-    "amountETH": 1000000,
-    "amountTokenMin": 10000,
-    "amountETHMin": 10000
-    })
-print(r.hex())
-
-r = dfbl.trade({
-    "action": "removeLiquidityETH",
-    "token": dai,
-    "liquidity": 10000,
-    "amountTokenMin": 1000,
-    "amountETHMin": 1000
-    })
-print(r.hex())
 
