@@ -104,9 +104,8 @@ class Defibot:
                 self.process_txn(event.hex(), txn, block_identifier)
         except web3.exceptions.TransactionNotFound:
             pass
-        # and whatever
-    def handle_block(self, event):
-        print("block - ", event)
+    def handle_block(self, block):
+        print("block - ", block)
     def process_txn(self, txid, txn, block_identifier='latest'):
         print(txid, txn)
     def gasnow(self):
