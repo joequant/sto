@@ -15,3 +15,9 @@ wget https://faucet.ropsten.be/donate/<your ethereum address>
 Kovan DAI
 https://www.reddit.com/r/MakerDAO/comments/f2msfr/question_how_to_get_some_kovan_dai_from_oasis/
 https://testnet.aave.com/faucet
+
+
+Txns
+0x3daf3c7c9542f7eabcd72cdefcc84a7b923b6b40556280c287431e4017d903f0
+11555377
+

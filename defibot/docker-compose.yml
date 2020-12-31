@@ -16,13 +16,13 @@ services:
 #      postgres_db: graph-node
 #      ipfs: "ipfs:5001"
 #      ethereum: "mainnet:https://mainnet.infura.io"
-  ipfs:
+#  ipfs:
 # see https://discuss.ipfs.io/t/getting-a-405-method-not-allowed-error-in-the-latest-go-ipfs-docker-image/7665
-    image:  ipfs/go-ipfs:master-2020-03-13-6774106 
-    ports:
-      - "5001:5001"
-    volumes:
-      - ./data/ipfs:/data/ipfs
+#    image:  ipfs/go-ipfs:master-2020-03-13-6774106 
+#    ports:
+#      - "5001:5001"
+#    volumes:
+#      - ./data/ipfs:/data/ipfs
 #  postgres:
 #    image: postgres
 #    ports:
@@ -43,5 +43,6 @@ services:
       - ./data/ethereum:/root/.ethereum
     command: >
       --http  --http.api web3,eth,personal,miner,net,txpool
-      --http.addr "127.0.0.1" --graphql --cache=2048 --gcmode=archive
-      --txpool.globalqueue=1000000
+      --http.addr "127.0.0.1" --graphql --gcmode=archive
+
+#--txpool.globalqueue=1000000  --cache=2048
