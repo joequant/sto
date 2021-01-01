@@ -33,6 +33,9 @@ def match_nocase(a, b):
 def normalize_decimal(a, b):
     return a / pow(10, b)
 
+def denormalize_decimal(a, b):
+    return int(a * pow(10, b))
+
 ETH_DECIMALS=18
 
 class Defibot:
@@ -201,11 +204,14 @@ class Defibot:
                 'swapTokensForExactTokens',
                 'swapExactTokensForTokens']:
             return 120000
+
     def backtest(self, block_start='latest',
-                 block_finish='latest'):
+                 block_finish=None):
         if block_start == 'latest':
             block_start = self.web3().eth.blockNumber
-        if block_finish == 'latest':
+        if block_finish is None:
+            block_finish = block_start
+        elif block_finish == 'latest':
             block_finish = self.web3().eth.blockNumber
         for i in range(block_start, block_finish+1):
             block = self.web3().eth.getBlock(i)
@@ -213,6 +219,7 @@ class Defibot:
                 logger.debug("txn - %s", t.hex())
                 self.handle_txn(t, i-1)
             self.handle_block(block)
+
     def get_balance(self, contract=None, block_identifier="latest"):
         if contract == self.get_weth_address() or \
            contract is None:
