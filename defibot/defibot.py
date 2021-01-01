@@ -404,4 +404,4 @@ class Defibot:
 
 if __name__ == '__main__':
     dfb = Defibot()
-    dfb.run_eventloop(["0x7a250d5630b4cf539739df2c5dacb4c659f2488d"])
+    dfb.run_eventloop()
