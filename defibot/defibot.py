@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import os
+import sys
 import logging
 import asyncio
 import datetime
@@ -12,7 +13,7 @@ from dictcache import DictCache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
-logger.addHandler(logging.StreamHandler())
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 async def txn_loop(defibot, event_filter, poll_interval):
     while True:
