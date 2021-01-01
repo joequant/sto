@@ -150,7 +150,7 @@ class Defibot:
         for k,v in w3.geth.txpool.content()['pending'].items():
             for k1, v1 in v.items():
                 if v1['to'] is not None and v1['to'].lower() in self.router:
-                    self.process_txn(v1['hash'], v1)
+                    self.process_txn(v1)
     def data(self):
         return []
 
