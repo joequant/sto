@@ -114,13 +114,14 @@ class Defibot:
             if self.router is None or \
                (txn is not None and txn['to'] is not None \
                 and txn['to'].lower() in self.router):
-                self.process_txn(event.hex(), txn, block_identifier)
+                self.process_txn(txn, block_identifier)
         except web3.exceptions.TransactionNotFound:
             pass
-    def handle_block(self, block):
-        print("block - ", block)
-    def process_txn(self, txid, txn, block_identifier='latest'):
-        print(txid, txn)
+        # and whatever
+    def handle_block(self, event):
+        print("block - ", event)
+    def process_txn(self, txn, block_identifier='latest'):
+        print(txn)
     def gasnow(self):
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
         response.raise_for_status()
