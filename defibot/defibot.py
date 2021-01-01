@@ -193,6 +193,15 @@ class Defibot:
         return self.token_cache[token]
     def token_info(self, token: str):
         return self.token_info_graphql(token.lower())
+
+    def denormalize(self, a: numeric, token: str) -> int:
+        decimals = int(self.token_info(token)['decimals'])
+        return int(a * pow(10, decimals))
+
+    def normalize(self, a: numeric, token: str) -> float:
+        decimals = int(self.token_info(token)['decimals'])
+        return float(a) / pow(10, decimals)
+
     def pair_info(self, token0: str, token1: str):
         key = token0.lower() + token1.lower()
         if key not in self.pair_cache:
