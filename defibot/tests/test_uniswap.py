@@ -13,7 +13,7 @@ def test_uniswap():
                                    11548680) == [368376117274674840357, 1795233433826889826557050, 1608048232])
 
 def test_prices():
-    assert(dfb.eth_price(11548680)== 723.4845356694213)
+    assert(dfb.eth_price(1.0, 11548680)== 723.4845356694213)
     # current price of USDT should be close to 1
     assert((dfb.token_price('0xdAC17F958D2ee523a2206206994597C13D831ec7') - 1.0) < 0.01)
 

@@ -257,7 +257,9 @@ class Defibot:
             )
             return erc20_contract.functions.balanceOf(self.config('address')).call()
 
-    def eth_price(self, block_identifier: identifier="latest"):
+    def eth_price(self,
+                  qty: float=1.0,
+                  block_identifier: identifier="latest"):
         usdt = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
         usdt_decimals = int(self.token_info(usdt)['decimals'])
         reserve = self.get_reserves(self.get_weth_address(),
@@ -266,11 +268,11 @@ class Defibot:
         return normalize_decimal(
             reserve[1]/reserve[0],
             usdt_decimals - ETH_DECIMALS
-        )
-    def token_price(self, token :str,
+        ) * qty
+    def token_price(self, token :str, qty: float = 1.0,
                     block_identifier: identifier="latest"):
         if match_nocase(token, self.get_weth_address()):
-            return self.eth_price(block_identifier)
+            return self.eth_price(qty, block_identifier)
         token_decimals = int(self.token_info(token)['decimals'])
         try:
             reserve = self.get_reserves(self.get_weth_address(),
@@ -281,8 +283,8 @@ class Defibot:
         token_to_eth = normalize_decimal(
             reserve[0]/reserve[1],
             ETH_DECIMALS - token_decimals
-        )
-        return token_to_eth * self.eth_price(block_identifier)
+        ) * qty
+        return token_to_eth * self.eth_price(1.0, block_identifier)
 
     def get_reserves(self,
                      token_a: str, token_b: str,
