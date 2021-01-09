@@ -74,7 +74,7 @@ class Defibot:
         self.token_cache = DictCache("token-" + self.name)
         self.pair_cache = DictCache("pair-" + self.name)
         self.reserves_cache = DictCache("reserves-" + self.name)
-        self.deadline = 600.0
+        self.deadline = 1800.0
         self.default_gas_price = \
             self.web3().toWei(15, "gwei")
         self._weth_address: Optional[str] = None
