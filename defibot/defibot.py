@@ -5,11 +5,12 @@ import logging
 import asyncio
 import datetime
 import requests
-from typing import Optional, Union, Dict, cast
+from typing import Optional, Union, Dict, List, Sequence, cast
 from uniswap.uniswap import UniswapV2Client
 from hexbytes import HexBytes
 import web3
 from web3 import Web3
+from web3.types import BlockIdentifier, TxData
 import json5 # type: ignore
 from dictcache import DictCache
 import traceback
@@ -19,7 +20,6 @@ logger.setLevel(logging.WARNING)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 numeric = Union[int, float]
-identifier = Union[int, str]
 
 async def txn_loop(defibot, event_filter, poll_interval):
     while True:
@@ -44,17 +44,21 @@ async def block_loop(defibot, event_filter, poll_interval):
 def match_nocase(a: str, b: str) -> bool:
     return a.lower() == b.lower()
 
-def normalize_decimal(a, b):
+def normalize_decimal(
+        a: numeric,
+        b: numeric) -> float:
     return a / pow(10, b)
 
-def denormalize_decimal(a, b):
+def denormalize_decimal(
+        a: numeric,
+        b: numeric) -> int:
     return int(a * pow(10, b))
 
 ETH_DECIMALS=18
 
 class Defibot:
     def __init__(self,
-                 router=["0x7a250d5630b4cf539739df2c5dacb4c659f2488d"],
+                 router: Optional[Sequence[str]]=["0x7a250d5630b4cf539739df2c5dacb4c659f2488d"],
                  name: Optional[str]=None):
         script_dir = os.path.dirname(os.path.realpath(__file__))
         self.name = type(self).__name__ if name is None else name
@@ -73,15 +77,15 @@ class Defibot:
         self.deadline = 600.0
         self.default_gas_price = \
             self.web3().toWei(15, "gwei")
-        self._weth_address = None
+        self._weth_address: Optional[str] = None
     def config(self, s):
         return self._config.get(s, None)
 
-    def get_weth_address(self):
+    def get_weth_address(self) -> str:
         if self._weth_address is None:
             self._weth_address = \
                 self.uniswap().get_weth_address()
-        return self._weth_address
+        return cast(str, self._weth_address)
 
     def web3(self) -> Web3:
         if self._web3 is None:
@@ -126,7 +130,7 @@ class Defibot:
     def pending_txns(self):
         return None
 
-    def handle_txn(self, txn, block_identifier='latest'):
+    def handle_txn(self, txn: TxData, block_identifier: BlockIdentifier='latest'):
         if self.router is None or \
            (txn is not None and txn['to'] is not None \
             and txn['to'].lower() in self.router):
@@ -176,7 +180,7 @@ class Defibot:
         request.raise_for_status()
         return request.json()
 
-    def token_info_graphql(self, token: str):
+    def token_info_graphql(self, token: str) -> dict:
         if token not in self.token_cache:
             query = """{
   token(id:"%s") {
@@ -196,7 +200,7 @@ class Defibot:
             retval = retval['data']['token']
             self.token_cache[token] = retval
         return self.token_cache[token]
-    def token_info(self, token: str):
+    def token_info(self, token: str) -> dict:
         return self.token_info_graphql(token.lower())
 
     def denormalize(self, a: numeric, token: str) -> int:
@@ -207,7 +211,7 @@ class Defibot:
         decimals = int(self.token_info(token)['decimals'])
         return float(a) / pow(10, decimals)
 
-    def pair_info(self, token0: str, token1: str):
+    def pair_info(self, token0: str, token1: str) -> str:
         key = token0.lower() + token1.lower()
         if key not in self.pair_cache:
             self.pair_cache[key] = \
@@ -230,8 +234,8 @@ class Defibot:
                 'swapExactTokensForTokens']:
             return 120000
 
-    def backtest(self, block_start_id: identifier='latest',
-                 block_finish_id: Optional[identifier]=None):
+    def backtest(self, block_start_id: BlockIdentifier='latest',
+                 block_finish_id: Optional[BlockIdentifier]=None):
         block_start = self.web3().eth.blockNumber\
             if block_start_id == 'latest' else int(block_start_id)
         if block_finish_id is None:
@@ -250,7 +254,7 @@ class Defibot:
 
     def get_balance(self, contract:Optional[str]=None,
                     normalize: bool =False,
-                    block_identifier: identifier="latest"):
+                    block_identifier: BlockIdentifier="latest"):
         if contract is None or \
            contract.lower() == self.get_weth_address().lower():
             balance = self.web3().eth.getBalance(
@@ -268,7 +272,7 @@ class Defibot:
 
     def eth_price(self,
                   qty: float=1.0,
-                  block_identifier: identifier="latest"):
+                  block_identifier: BlockIdentifier="latest") -> numeric:
         usdt = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
         usdt_decimals = int(self.token_info(usdt)['decimals'])
         reserve = self.get_reserves(self.get_weth_address(),
@@ -279,7 +283,7 @@ class Defibot:
             usdt_decimals - ETH_DECIMALS
         ) * qty
     def token_price(self, token :str, qty: float = 1.0,
-                    block_identifier: identifier="latest"):
+                    block_identifier: BlockIdentifier="latest") -> Optional[numeric]:
         if match_nocase(token, self.get_weth_address()):
             return self.eth_price(qty, block_identifier)
         token_decimals = int(self.token_info(token)['decimals'])
@@ -297,7 +301,7 @@ class Defibot:
 
     def get_reserves(self,
                      token_a: str, token_b: str,
-                     block_identifier: identifier):
+                     block_identifier: BlockIdentifier) -> List[int]:
         if block_identifier == "latest":
             u = self.uniswap()
             return u.get_reserves(token_a,
