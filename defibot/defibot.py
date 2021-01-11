@@ -244,6 +244,9 @@ class Defibot:
             block_finish = self.web3().eth.blockNumber
         else:
             block_finish = int(block_finish_id)
+
+        prev_execute_trade = self.execute_trade
+        self.execute_trade = False
         for i in range(block_start, block_finish+1):
             block = self.web3().eth.getBlock(i)
             for t in block['transactions']:
@@ -251,6 +254,7 @@ class Defibot:
                 logger.debug("txn - %s", ht.hex())
                 self.handle_txn(self.web3().eth.getTransaction(ht), i-1)
             self.handle_block(block)
+        self.execute_trade = prev_execute_trade
 
     def get_balance(self, contract:Optional[str]=None,
                     normalize: bool =False,
