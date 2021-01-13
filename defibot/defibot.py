@@ -20,6 +20,7 @@ logger.setLevel(logging.WARNING)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 numeric = Union[int, float]
+zero_address = '0x0000000000000000000000000000000000000000'
 
 async def txn_loop(defibot, event_filter, poll_interval):
     while True:
@@ -260,7 +261,7 @@ class Defibot:
                     normalize: bool =False,
                     block_identifier: BlockIdentifier="latest"):
         if contract is None or \
-           contract.lower() == self.get_weth_address().lower():
+           contract.lower() == zero_address:
             balance = self.web3().eth.getBalance(
                 self.config('address'),
                 block_identifier=block_identifier
@@ -406,7 +407,7 @@ class Defibot:
                 deadline
             ).hex()
         if action == "swapTokensForExactTokens":
-            return u.swap_exact_tokens_for_tokens(
+            return u.swap_tokens_for_exact_tokens(
                 d['amountOut'],
                 d['amountInMax'],
                 d['path'],
