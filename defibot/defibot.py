@@ -309,9 +309,10 @@ class Defibot:
                      block_identifier: BlockIdentifier) -> List[int]:
         if block_identifier == "latest":
             u = self.uniswap()
-            return u.get_reserves(token_a,
-                                  token_b,
-                                  block_identifier)
+            return u.get_reserves(
+                self.web3().toChecksumAddress(token_a),
+                self.web3().toChecksumAddress(token_b),
+                block_identifier)
         key = "%s%s%d" % (token_a.lower(),
                           token_b.lower(),
                           int(block_identifier))
