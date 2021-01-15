@@ -24,8 +24,8 @@ cat <<EOF >> $rootfsDir/etc/dnf/dnf.conf
 fastestmirror=true
 max_parallel_downloads=15
 EOF
-if [ -e $rootfsDir/tmp/proxy.sh ]; then
-    source $rootfsDir/tmp/proxy.sh
+if [ -e $scriptDir/proxy.sh ]; then
+    source $scriptDir/proxy.sh
 fi
 
 dnf upgrade --best --nodocs --allowerasing --refresh -y \
