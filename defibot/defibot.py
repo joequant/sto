@@ -141,7 +141,7 @@ class Defibot:
 
     def handle_block(self, event):
         print("block - ", event)
-    def process_txn(self, txn,
+    def process_txn(self, txn: TxData,
                     block_identifier: BlockIdentifier='latest'):
         print(txn)
     def gasnow(self):
