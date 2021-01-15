@@ -141,7 +141,8 @@ class Defibot:
 
     def handle_block(self, event):
         print("block - ", event)
-    def process_txn(self, txn, block_identifier='latest'):
+    def process_txn(self, txn,
+                    block_identifier: BlockIdentifier='latest'):
         print(txn)
     def gasnow(self):
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
