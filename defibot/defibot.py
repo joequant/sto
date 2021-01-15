@@ -79,6 +79,8 @@ class Defibot:
         self.default_gas_price = \
             self.web3().toWei(15, "gwei")
         self._weth_address: Optional[str] = None
+        self.execute_trade = False
+
     def config(self, s):
         return self._config.get(s, None)
 
@@ -424,7 +426,7 @@ class Defibot:
                 deadline
             ).hex()
         if action == "swapTokensForExactETH":
-            return u.swap_exact_tokens_for_tokens(
+            return u.swap_tokens_for_exact_eth(
                 d['amountOut'],
                 d['amountInMax'],
                 d['path'],
