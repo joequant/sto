@@ -5,6 +5,7 @@ import logging
 import asyncio
 import datetime
 import requests
+import pprint
 from typing import Optional, Union, Dict, List, Sequence, cast
 from uniswap.uniswap import UniswapV2Client
 from hexbytes import HexBytes
@@ -16,7 +17,7 @@ from dictcache import DictCache
 import traceback
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 numeric = Union[int, float]
@@ -156,6 +157,9 @@ class Defibot:
             self._abi_cache[contract] = response.json()['result']
         return self._abi_cache[contract]
     def run_eventloop(self):
+        logger.info("object %s", pprint.pformat(vars(self)))
+        logger.info("current time %s", datetime.datetime.utcnow().isoformat()[:-3]+ 'Z')
+
         w3 = self.web3()
         block_filter = w3.eth.filter('latest')
         tx_filter = w3.eth.filter('pending')
