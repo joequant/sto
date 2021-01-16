@@ -145,10 +145,12 @@ class Defibot:
     def process_txn(self, txn: TxData,
                     block_identifier: BlockIdentifier='latest'):
         print(txn)
-    def gasnow(self):
+
+    def gasnow(self) -> Dict:
         response = requests.get('https://www.gasnow.org/api/v3/gas/price?utm_source=defibot')
         response.raise_for_status()
         return response.json()
+
     def get_abi(self, contract: str):
         if contract not in self._abi_cache:
             response = \
@@ -180,7 +182,7 @@ class Defibot:
     def data(self):
         return []
 
-    def query(self, endpoint: str, query: str):
+    def query(self, endpoint: str, query: str) -> Dict:
         request = requests.post(
             'https://api.thegraph.com/subgraphs/name/{}'.format(endpoint),
             json={'query': query}
@@ -188,7 +190,7 @@ class Defibot:
         request.raise_for_status()
         return request.json()
 
-    def token_info_graphql(self, token: str) -> dict:
+    def token_info_graphql(self, token: str) -> Dict:
         if token not in self.token_cache:
             query = """{
   token(id:"%s") {
@@ -208,7 +210,8 @@ class Defibot:
             retval = retval['data']['token']
             self.token_cache[token] = retval
         return self.token_cache[token]
-    def token_info(self, token: str) -> dict:
+
+    def token_info(self, token: str) -> Dict:
         return self.token_info_graphql(token.lower())
 
     def denormalize(self, a: numeric, token: str) -> int:
@@ -331,7 +334,7 @@ class Defibot:
                                block_identifier)
         return self.reserves_cache[key]
 
-    def trade(self, d:dict) -> str:
+    def trade(self, d: Dict) -> str:
         u = self.uniswap_write()
         action = d['action']
         to = d['to'] if 'to' in d else self.config('address')
