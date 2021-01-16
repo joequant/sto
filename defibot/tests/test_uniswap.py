@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import defibot
+from uniswap.uniswap import UniswapV2Client
 
 dfb = defibot.Defibot(name="test-uniswap")
 u = dfb.uniswap()
@@ -39,3 +40,19 @@ def test_amounts():
          1400000000000000000,
         [[3223416058367995504345, 979786713651899511776, 1605434469]]) \
            == [4626352242171670528, 1400000000000000000])
+
+def test_sushiswap():
+    u = UniswapV2Client(dfb.config('address'),
+                        dfb.config('private_key'),
+                        provider=dfb.config('provider'),
+                        router_config="sushiswap"
+                        )
+    # USDT/ETH
+    assert(u.get_pair('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                      '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') \
+           == '0x397FF1542f962076d0BFE58eA045FfA2d347ACa0')
+    assert(u.get_reserves_graphql('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                           '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+                                 11548680) == \
+          [104737025632327970998821, 75552143369019, 1599678405])
+

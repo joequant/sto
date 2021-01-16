@@ -60,14 +60,14 @@ ETH_DECIMALS=18
 
 class Defibot:
     def __init__(self,
-                 router: Optional[Sequence[str]]=["0x7a250d5630b4cf539739df2c5dacb4c659f2488d"],
+                 router_config: str='uniswap',
                  name: Optional[str]=None):
         script_dir = os.path.dirname(os.path.realpath(__file__))
         self.name = type(self).__name__ if name is None else name
         with open(os.path.join(script_dir, 'config.json')) as f:
             self._config = json5.load(f)
         self._uniswap: Optional[UniswapV2Client] = None
-        self.router = router
+        self.router_config = router_config
         self._uniswap_write: Optional[UniswapV2Client] = None
         self._web3: Optional[Web3] = None
         self._web3_write: Optional[Web3] = None
@@ -81,6 +81,7 @@ class Defibot:
             self.web3().toWei(15, "gwei")
         self._weth_address: Optional[str] = None
         self.execute_trade = False
+        self.router = [ self.uniswap().router_address ]
 
     def config(self, s):
         return self._config.get(s, None)
@@ -119,17 +120,23 @@ class Defibot:
                 provider = self.config('provider_archive')
             else:
                 provider = self.config('provider')
-            self._uniswap = UniswapV2Client(self.config('address'),
-                                            self.config('private_key'),
-                                            provider=provider)
+            self._uniswap = UniswapV2Client(
+                self.config('address'),
+                self.config('private_key'),
+                provider=provider,
+                router_config=self.router_config
+            )
         return self._uniswap
     def uniswap_write(self) -> UniswapV2Client:
         if 'provider_write' not in self._config:
             return self.uniswap()
         if self._uniswap_write is None:
-            self._uniswap_write = UniswapV2Client(self.config('address'),
-                                                  self.config('private_key'),
-                                                  provider=self.config('provider_write'))
+            self._uniswap_write = UniswapV2Client(
+                self.config('address'),
+                self.config('private_key'),
+                provider=self.config('provider_write'),
+                router_config=self.router_config
+            )
         return self._uniswap_write
     def pending_txns(self):
         return None
