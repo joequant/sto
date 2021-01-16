@@ -81,7 +81,7 @@ class Defibot:
             self.web3().toWei(15, "gwei")
         self._weth_address: Optional[str] = None
         self.execute_trade = False
-        self.router = [ self.uniswap().router_address ]
+        self.router = [ self.uniswap().router_address.lower() ]
 
     def config(self, s):
         return self._config.get(s, None)
@@ -166,7 +166,6 @@ class Defibot:
             self._abi_cache[contract] = response.json()['result']
         return self._abi_cache[contract]
     def run_eventloop(self):
-        logger.info("object %s", pprint.pformat(vars(self)))
         logger.info("current time %s", datetime.datetime.utcnow().isoformat()[:-3]+ 'Z')
 
         w3 = self.web3()
