@@ -11,7 +11,7 @@ from uniswap.uniswap import UniswapV2Client
 from hexbytes import HexBytes
 import web3
 from web3 import Web3
-from web3.types import BlockIdentifier, TxData
+from web3.types import BlockIdentifier, TxData, BlockData
 import json5 # type: ignore
 from dictcache import DictCache
 import traceback
@@ -141,16 +141,19 @@ class Defibot:
     def pending_txns(self):
         return None
 
-    def handle_txn(self, txn: TxData, block_identifier: BlockIdentifier='latest'):
+    def handle_txn(self,
+                   txn: TxData,
+                   block_identifier: BlockIdentifier='latest') -> None:
         if self.router is None or \
            (txn is not None and txn['to'] is not None \
             and txn['to'].lower() in self.router):
             self.process_txn(txn, block_identifier)
 
-    def handle_block(self, event):
+    def handle_block(self, event: BlockData) -> None:
         print("block - ", event)
+
     def process_txn(self, txn: TxData,
-                    block_identifier: BlockIdentifier='latest'):
+                    block_identifier: BlockIdentifier='latest') -> None:
         print(txn)
 
     def gasnow(self) -> Dict:
@@ -165,7 +168,8 @@ class Defibot:
             response.raise_for_status()
             self._abi_cache[contract] = response.json()['result']
         return self._abi_cache[contract]
-    def run_eventloop(self):
+
+    def run_eventloop(self) -> None:
         logger.info("current time %s", datetime.datetime.utcnow().isoformat()[:-3]+ 'Z')
 
         w3 = self.web3()
@@ -221,11 +225,17 @@ class Defibot:
         return self.token_info_graphql(token.lower())
 
     def denormalize(self, a: numeric, token: str) -> int:
-        decimals = int(self.token_info(token)['decimals'])
+        if token == zero_address:
+            decimals = ETH_DECIMALS
+        else:
+            decimals = int(self.token_info(token)['decimals'])
         return int(a * pow(10, decimals))
 
     def normalize(self, a: numeric, token: str) -> float:
-        decimals = int(self.token_info(token)['decimals'])
+        if token == zero_address:
+            decimals = ETH_DECIMALS
+        else:
+            decimals = int(self.token_info(token)['decimals'])
         return float(a) / pow(10, decimals)
 
     def pair_info(self, token0: str, token1: str) -> str:
@@ -234,9 +244,12 @@ class Defibot:
             self.pair_cache[key] = \
                 self.uniswap().get_pair(token0, token1)
         return self.pair_cache[key]
-    def now(self):
+
+    @classmethod
+    def now(cls) -> float:
         return datetime.datetime.now().timestamp()
-    def gas_use(self, d: Dict):
+
+    def gas_use(self, d: Dict) -> Optional[int]:
         if not isinstance(d, dict):
             return None
         if 'func' not in d:
@@ -250,6 +263,7 @@ class Defibot:
                 'swapTokensForExactTokens',
                 'swapExactTokensForTokens']:
             return 120000
+        return None
 
     def backtest(self, block_start_id: BlockIdentifier='latest',
                  block_finish_id: Optional[BlockIdentifier]=None):
