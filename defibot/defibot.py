@@ -72,7 +72,7 @@ class Defibot:
         self._web3: Optional[Web3] = None
         self._web3_write: Optional[Web3] = None
         self._abi_cache: Dict[str, str] = {}
-        self.wait_async = 1
+        self.wait_async = 0.1
         self.token_cache = DictCache("token-" + self.name)
         self.pair_cache = DictCache("pair-" + self.name)
         self.reserves_cache = DictCache("reserves-" + self.name)
@@ -360,7 +360,7 @@ class Defibot:
         to = d['to'] if 'to' in d else self.config('address')
         deadline = d['deadline'] if 'deadline' in d \
             else int(self.now() + self.deadline)
-        u.gasPrice = d['gasPrice'] if 'gasPrice' \
+        u.gasPrice = int(d['gasPrice']) if 'gasPrice' \
             in d else self.default_gas_price
         if action == "addLiquidity":
             return u.add_liquidity(
