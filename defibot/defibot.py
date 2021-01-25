@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import requests
 import pprint
+import traceback
 from typing import Optional, Union, Dict, List, Sequence, cast
 from uniswap.uniswap import UniswapV2Client
 from hexbytes import HexBytes
@@ -39,7 +40,7 @@ async def txn_loop(defibot, event_filter, poll_interval):
 async def block_loop(defibot, event_filter, poll_interval):
     while True:
         for event in event_filter.get_new_entries():
-            block = defibot.web3().eth.getBlock(event)
+            block = defibot.get_block(event)
             defibot.handle_block(block)
         await asyncio.sleep(poll_interval)
 
@@ -61,14 +62,14 @@ ETH_DECIMALS=18
 class Defibot:
     def __init__(self,
                  router_config: str='uniswap',
-                 name: Optional[str]=None):
+                 name: Optional[str]=None,
+                 filter_address: Sequence[str]=None):
         script_dir = os.path.dirname(os.path.realpath(__file__))
         self.name = type(self).__name__ if name is None else name
         with open(os.path.join(script_dir, 'config.json')) as f:
             self._config = json5.load(f)
-        self._uniswap: Optional[UniswapV2Client] = None
+        self._uniswap: Dict[str, UniswapV2Client] = {}
         self.router_config = router_config
-        self._uniswap_write: Optional[UniswapV2Client] = None
         self._web3: Optional[Web3] = None
         self._web3_write: Optional[Web3] = None
         self._abi_cache: Dict[str, str] = {}
@@ -81,7 +82,8 @@ class Defibot:
             self.web3().toWei(15, "gwei")
         self._weth_address: Optional[str] = None
         self.execute_trade = False
-        self.router = [ self.uniswap().router_address.lower() ]
+        self.filter_address = [ self.uniswap().router_address.lower() ] \
+            if filter_address is None else [x.lower() for x in filter_address]
 
     def config(self, s):
         return self._config.get(s, None)
@@ -114,40 +116,35 @@ class Defibot:
             else:
                 raise NotImplementedError
         return self._web3_write
-    def uniswap(self) -> UniswapV2Client:
-        if self._uniswap is None:
+    def uniswap(self, router: Optional[str]=None) -> UniswapV2Client:
+        if router is None:
+            router = self.router_config
+
+        if router not in self._uniswap:
             if 'provider_archive' in self._config:
                 provider = self.config('provider_archive')
             else:
                 provider = self.config('provider')
-            self._uniswap = UniswapV2Client(
+            self._uniswap[router] = UniswapV2Client(
                 self.config('address'),
                 self.config('private_key'),
                 provider=provider,
-                router_config=self.router_config
+                router_config=router
             )
-        return self._uniswap
-    def uniswap_write(self) -> UniswapV2Client:
-        if 'provider_write' not in self._config:
-            return self.uniswap()
-        if self._uniswap_write is None:
-            self._uniswap_write = UniswapV2Client(
-                self.config('address'),
-                self.config('private_key'),
-                provider=self.config('provider_write'),
-                router_config=self.router_config
-            )
-        return self._uniswap_write
+        return self._uniswap[router]
     def pending_txns(self):
         return None
 
     def handle_txn(self,
                    txn: TxData,
                    block_identifier: BlockIdentifier='latest') -> None:
-        if self.router is None or \
+        if self.filter_address is None or \
            (txn is not None and txn['to'] is not None \
-            and txn['to'].lower() in self.router):
+            and txn['to'].lower() in self.filter_address):
             self.process_txn(txn, block_identifier)
+
+    def get_block(self, event: BlockIdentifier) -> BlockData:
+        return self.web3().eth.getBlock(event)
 
     def handle_block(self, event: BlockData) -> None:
         print("block - ", event)
@@ -170,7 +167,8 @@ class Defibot:
         return self._abi_cache[contract]
 
     def run_eventloop(self) -> None:
-        logger.info("current time %s", datetime.datetime.utcnow().isoformat()[:-3]+ 'Z')
+        logger.info('>>> ENTERING EVENT LOOP')
+        logger.info(">>> current time %s", datetime.datetime.utcnow().isoformat()[:-3]+ 'Z')
 
         w3 = self.web3()
         block_filter = w3.eth.filter('latest')
@@ -238,11 +236,14 @@ class Defibot:
             decimals = int(self.token_info(token)['decimals'])
         return float(a) / pow(10, decimals)
 
-    def pair_info(self, token0: str, token1: str) -> str:
-        key = token0.lower() + token1.lower()
+    def pair_info(self, token0: str, token1: str,
+                  router: Optional[str] = None) -> str:
+        if router is None:
+            router = self.router_config
+        key = token0.lower() + ":" + token1.lower() + ":" + router
         if key not in self.pair_cache:
             self.pair_cache[key] = \
-                self.uniswap().get_pair(token0, token1)
+                self.uniswap(router).get_pair(token0, token1)
         return self.pair_cache[key]
 
     @classmethod
@@ -336,18 +337,22 @@ class Defibot:
 
     def get_reserves(self,
                      token_a: str, token_b: str,
-                     block_identifier: BlockIdentifier) -> List[int]:
+                     block_identifier: BlockIdentifier,
+                     router: Optional[str] = None) -> List[int]:
+        if router is None:
+            router = self.router_config
         if block_identifier == "latest":
-            u = self.uniswap()
+            u = self.uniswap(router)
             return u.get_reserves(
                 self.web3().toChecksumAddress(token_a),
                 self.web3().toChecksumAddress(token_b),
                 block_identifier)
-        key = "%s%s%d" % (token_a.lower(),
+        key = "%s%s%d%s" % (token_a.lower(),
                           token_b.lower(),
-                          int(block_identifier))
+                            int(block_identifier),
+                            router)
         if key not in self.reserves_cache:
-            u = self.uniswap()
+            u = self.uniswap(router)
             self.reserves_cache[key] = \
                 u.get_reserves(token_a,
                                token_b,
@@ -355,13 +360,25 @@ class Defibot:
         return self.reserves_cache[key]
 
     def trade(self, d: Dict) -> str:
-        u = self.uniswap_write()
+        u = self.uniswap(d.get('router', self.router_config))
         action = d['action']
         to = d['to'] if 'to' in d else self.config('address')
         deadline = d['deadline'] if 'deadline' in d \
             else int(self.now() + self.deadline)
-        u.gasPrice = int(d['gasPrice']) if 'gasPrice' \
-            in d else self.default_gas_price
+        u.gasPrice = int(d.get('gasPrice', self.default_gas_price))
+        if d.get('dummyAction', False):
+            contract = self.web3_write().eth.contract(
+                self.web3().toChecksumAddress(self.get_weth_address()),
+                abi=self.uniswap().ERC20_ABI
+            )
+            address = self.config('address')
+            print(address)
+            print(contract.functions.balanceOf(address).call())
+            traceback.print_stack()
+            transaction_count = u.conn.eth.getTransactionCount(u.address)
+            func = contract.functions.transfer(address, 0)
+            params = u._create_transaction_params(gas=50000)
+            return u._send_transaction(func, params).hex()
         if action == "addLiquidity":
             return u.add_liquidity(
                 d['tokenA'],
@@ -478,6 +495,37 @@ class Defibot:
                 deadline
             ).hex()
         raise Exception("invalid action")
+
+    @classmethod
+    def factory(cls, config):
+        logger.info('>>>>')
+        logger.info('>>>> CREATING NEW BOT')
+        logger.info('config = %s', pprint.pformat(config))
+        return cls(**config)
+
+    def match_path(
+            self, d: Dict,
+            tokens: Optional[Sequence[str]]) -> Optional[List[str]]:
+        """Find matching path from txn"""
+        if 'path' not in d:
+            return None
+        path = d['path']
+        if tokens is None:
+            return [self.web3().toChecksumAddress(path[0]),
+                    self.web3().toChecksumAddress(path[1])]
+        for x, y in zip(path, path[1:]):
+            if x.lower() in tokens and \
+               y.lower() in tokens and \
+               x.lower() != y.lower():
+                return [
+                    self.web3().toChecksumAddress(x),
+                    self.web3().toChecksumAddress(y)
+                ]
+        return None
+
+    @classmethod
+    def logger(cls):
+        return logger
 
 if __name__ == '__main__':
     dfb = Defibot()
